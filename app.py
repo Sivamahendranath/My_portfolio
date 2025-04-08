@@ -675,7 +675,7 @@ projects = [
             "Modular Architecture: Structured with scalable components and future-ready plans including authentication, payments, and multi-language support."
         ],
         "tech": ["Python", "Streamlit", "Plotly", "Pandas", "ReportLab", "HTML/CSS"],
-        "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/readme.md",
+        "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/app.py",
     },
     {
         "title": "Exam Proctoring System",
