@@ -1,6 +1,6 @@
 # Sivamahendranath Ragimanu - Interactive Portfolio
 
-![Portfolio Banner](https://github.com/Sivamahendranath/portfolio/raw/main/images/profile.jpeg)
+![Portfolio Banner](https://github.com/Sivamahendranath/My_portfolio/blob/main/images/profile.jpeg)
 
 ## 👨‍💻 Professional Summary
 
