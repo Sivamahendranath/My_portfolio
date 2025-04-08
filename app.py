@@ -640,7 +640,7 @@ projects = [
             "Customizable Themes & Export Analysis History"
         ],
         "tech": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
-        "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/blob/main/README.md"
+        "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/tree/main/code"
     },
     {
         "title": "Student Performance Dashboards for Exams",
