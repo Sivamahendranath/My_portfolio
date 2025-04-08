@@ -640,13 +640,13 @@ projects = [
             "Customizable Themes & Export Analysis History"
         ],
         "tech": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
-        "github": "https://github.com/Sivamahendranath/DocuGenius-Pro"
+        "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/blob/main/README.md"
     },
     {
         "title": "Student Performance Dashboards for Exams",
         "date": "October 2024 - November 2024",
         "org": "C-DAC, Hyderabad",
-        "type": "Personal Mini Project",
+        "type": "Mini Project",
         "description": "Data visualization dashboards for analyzing student performance",
         "details": [
             "Cleaned and processed datasets, converting columns to numeric and handling missing data",
@@ -675,7 +675,7 @@ projects = [
             "Modular Architecture: Structured with scalable components and future-ready plans including authentication, payments, and multi-language support."
         ],
         "tech": ["Python", "Streamlit", "Plotly", "Pandas", "ReportLab", "HTML/CSS"],
-        "github": "https://github.com/Sivamahendranath/APSPDCL-Bill-Calculator",
+        "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/readme.md",
     },
     {
         "title": "Exam Proctoring System",
