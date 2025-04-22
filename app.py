@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -13,10 +14,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import re
 import json
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 # Page configuration
 st.set_page_config(
