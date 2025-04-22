@@ -785,7 +785,7 @@ projects = [
 
         ],
         "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Sqlite3","Plotly", "NLP", "NetworkX", "BeautifulSoup"],
-        "github": "https://github.com/Sivamahendranath/Knowledge_Graph_with_LLM/blob/main/backup.py"
+        "github": "https://github.com/Sivamahendranath/Gemini_Knowledge_Graph/blob/main/backup.py"
     },
     {
         "title": "DocuGenius Pro",
