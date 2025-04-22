@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -1145,35 +1144,34 @@ with col1:
                 st.rerun()
 
 with col2:
-    st.markdown("### Contact Information")
-    
+    st.markdown("### 📱 Contact Information")
+   
     # Location
-    st.markdown("#### Location")
+    st.markdown("#### 📍 Location")
     st.write("Anantapur, Andhra Pradesh, India")
-    
+   
     # Email
-    st.markdown("#### Email")
+    st.markdown("#### ✉️ Email")
     st.write("mahendraragimanu2@gmail.com")
-    
+   
     # Phone
-    st.markdown("#### Phone")
+    st.markdown("#### ☎️ Phone")
     st.write("+91 8106442744")
-    
+   
     # Social links using columns instead of HTML
-    st.markdown("#### Connect With Me")
+    st.markdown("#### 🔗 Connect With Me")
     social_cols = st.columns(3)
-    
+   
     with social_cols[0]:
-        st.markdown("[LinkedIn](https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/)")
-    
+        st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/)")
+   
     with social_cols[1]:
-        st.markdown("[GitHub](https://github.com/Sivamahendranath)")
-    
+        st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sivamahendranath)")
+   
     with social_cols[2]:
-        st.markdown("[Email](mailto:mahendraragimanu2@gmail.com)")
+        st.markdown("[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mahendraragimanu2@gmail.com)")
 
 st.markdown('</div>', unsafe_allow_html=True)
-
 # Footer
 st.markdown("""
 <div class="footer">
