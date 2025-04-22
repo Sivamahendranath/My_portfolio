@@ -803,7 +803,7 @@ projects = [
 
         ],
        "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
-         "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/tree/main/code"
+         "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/blob/main/code/main.py"
     },
     {
         "title": "Student Performance Dashboards for Exams",
