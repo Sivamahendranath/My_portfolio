@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -8,6 +9,15 @@ from PIL import Image
 import numpy as np
 import os
 from pathlib import Path
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import re
+import json
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -15,7 +25,6 @@ st.set_page_config(
     page_icon="👨‍💻",
     layout="wide",
 )
-
 # Function to get image path
 def get_image_path(relative_path):
     """Get absolute path for an image based on relative path"""
@@ -42,13 +51,12 @@ def verify_image_paths():
     """Verify all image paths exist and are accessible"""
     image_paths = [
         "profile.jpeg",
-        "background.jpg",
         "about_me.jpeg",
         "work_experience_cdac.png",
-        "work_experience/oppo.jpg",
+        "work_experience_oppo.jpg",
         "knowledge_graph.png",
         "docugenius.png",
-        "student_dashboard.jpg",
+        "student_dashboard.png",
         "apspdcl.jpg",
         "exam_proctor.jpg",
         "smart_fan.jpg",
@@ -74,6 +82,100 @@ def get_placeholder_image(width, height, color="#5846f6"):
     """Generate a placeholder image using PIL"""
     img = Image.new('RGB', (width, height), color=color)
     return img
+
+# Function to save message to database (JSON file for simplicity)
+def save_message_to_db(name, email, message):
+    """Save contact message to a JSON file that acts as a simple database"""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    message_data = {
+        "name": name,
+        "email": email,
+        "message": message,
+        "timestamp": timestamp,
+        "read": False
+    }
+    
+    # Check if database file exists, create if not
+    db_path = Path(__file__).parent / "data"
+    db_path.mkdir(exist_ok=True)
+    
+    messages_file = db_path / "contact_messages.json"
+    
+    if messages_file.exists():
+        with open(messages_file, "r") as f:
+            try:
+                messages = json.load(f)
+            except json.JSONDecodeError:
+                messages = []
+    else:
+        messages = []
+    
+    messages.append(message_data)
+    
+    with open(messages_file, "w") as f:
+        json.dump(messages, f, indent=4)
+    
+    return True
+
+# Function to send email notification
+def send_email_notification(name, email, message):
+    """Send an email notification when a contact form is submitted"""
+    try:
+        # Get email credentials from environment variables
+        smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", "587"))
+        sender_email = os.getenv("SENDER_EMAIL")
+        sender_password = os.getenv("SENDER_PASSWORD")
+        recipient_email = os.getenv("RECIPIENT_EMAIL", "mahendraragimanu2@gmail.com")
+        
+        # Check if credentials are available
+        if not all([sender_email, sender_password, recipient_email]):
+            st.warning("Email credentials not configured properly. Email notification not sent.")
+            return False
+        
+        # Create email content
+        subject = f"New Portfolio Contact from {name}"
+        
+        # Create a multipart message
+        email_message = MIMEMultipart()
+        email_message["From"] = sender_email
+        email_message["To"] = recipient_email
+        email_message["Subject"] = subject
+        
+        # Create HTML content for the email
+        html_content = f"""
+        <html>
+            <body>
+                <h2>New Contact Message from Your Portfolio</h2>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Message:</strong></p>
+                <p>{message}</p>
+                <hr>
+                <p><em>This is an automated notification from your portfolio website.</em></p>
+            </body>
+        </html>
+        """
+        
+        # Attach HTML content
+        email_message.attach(MIMEText(html_content, "html"))
+        
+        # Connect to SMTP server
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()  # Secure the connection
+            server.login(sender_email, sender_password)
+            server.send_message(email_message)
+        
+        return True
+    except Exception as e:
+        st.error(f"Failed to send email: {str(e)}")
+        return False
+
+# Email validation function
+def is_valid_email(email):
+    """Validate email format using regex"""
+    email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return bool(re.match(email_pattern, email))
 
 # Include Font Awesome for icons
 st.markdown("""
@@ -296,6 +398,40 @@ st.markdown("""
         border-radius: 5px;
         margin-bottom: 10px;
     }
+    /* NEW: Skill category styling */
+    .skill-category {
+        margin-bottom: 30px;
+    }
+    .skill-category h3 {
+        color: #5846f6;
+        border-bottom: 1px solid rgba(88, 70, 246, 0.3);
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+    }
+    .skill-category-icon {
+        font-size: 1.8rem;
+        margin-right: 10px;
+        color: #5846f6;
+        vertical-align: middle;
+    }
+    /* Form validation styles */
+    .form-error {
+        color: #ff4444;
+        font-size: 0.9rem;
+        margin-top: 2px;
+    }
+    .form-success {
+        color: #4CAF50;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: rgba(76, 175, 80, 0.1);
+        border-left: 4px solid #4CAF50;
+        margin: 10px 0;
+    }
+    .required-field:after {
+        content: " *";
+        color: #ff4444;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -430,39 +566,69 @@ st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="section" id="skills">', unsafe_allow_html=True)
 st.markdown("<div class='section-header'><h2>Technical Skills</h2></div>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
-
-with col1:
-    # Load skills image
-    skills_image_path = get_image_path("skills.jpg")
-    if os.path.exists(skills_image_path):
-        skills_img = load_image(skills_image_path)
-    else:
-        skills_img = get_placeholder_image(400, 300, color="#7265f2")
-    st.image(skills_img, caption="Technical Skills", use_container_width=True)
-
-with col2:
-    # Technical Skills
-    skills = {
-        "Python": 85,
-        "HTML/CSS": 75,
-        "Java": 65,
-        "SQL (Oracle)": 70,
-        "Machine Learning": 75,
-        "Data Analysis": 80,
-        "LLMs & RAG": 65
+# NEW: Organized skills by category
+skill_categories = {
+    "Programming & Scripts": {
+        "icon": "fas fa-code",
+        "skills": [
+            "Python",
+            "Java"
+        ]
+    },
+    "Web Development": {
+        "icon": "fas fa-globe",
+        "skills": [
+            "HTML/CSS",
+            "JavaScript",
+            "Streamlit"
+        ]
+    },
+    "Database": {
+        "icon": "fas fa-database",
+        "skills": [
+            "SQL (Oracle)",
+            "SQLite"
+        ]
+    },
+    "Data Science & AI": {
+        "icon": "fas fa-brain",
+        "skills": [
+            "Machine Learning",
+            "Data Analysis",
+            "LLMs & RAG",
+            "Data Visualization"
+        ]
     }
+}
+
+# Display skills by category - only skill names, no bars
+for category, data in skill_categories.items():
+    st.markdown(f"""
+    <div class="skill-category">
+        <h3><i class="{data['icon']} skill-category-icon"></i>{category}</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
-    for skill, proficiency in skills.items():
-        st.markdown(f"""
-        <div class="skill-container fade-in">
-            <div class="skill-name">{skill}</div>
-            <div class="skill-bar-container">
-                <div class="skill-bar" style="width: {proficiency}%"></div>
+    col1, col2 = st.columns(2)
+    
+    skills_list = data["skills"]
+    half = len(skills_list) // 2 + len(skills_list) % 2
+    
+    with col1:
+        for skill in skills_list[:half]:
+            st.markdown(f"""
+            <div class="skill-container fade-in">
+                <div class="skill-name">{skill}</div>
             </div>
-            <div class="skill-percentage">{proficiency}%</div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        for skill in skills_list[half:]:
+            st.markdown(f"""
+            <div class="skill-container fade-in">
+                <div class="skill-name">{skill}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
 # Soft Skills
 st.markdown("<div class='section-header'><h2>Soft Skills</h2></div>", unsafe_allow_html=True)
@@ -497,7 +663,7 @@ st.markdown("""
 <div class="timeline fade-in">
     <div class="timeline-item">
         <div class="timeline-dot"></div>
-        <div class="timeline-date">October 2024 - Present</div>
+        <div class="timeline-date">October 2024 - April 2025</div>
         <div class="timeline-content custom-card">
             <h3>Data Analyst (Python), Intern</h3>
             <h4>C-DAC, Hyderabad</h4>
@@ -611,207 +777,245 @@ with col2:
 projects = [
     {
         "title": "AI-Powered Knowledge Graph Explorer",
-        "date": "January 2025, March 2025",
-        "org": "C-DAC, Hyderabad",
-        "type": "Main Project",
-        "description": "AI-Powered Knowledge Graph Generator using LLMs and Graph Visualization Application using Streamlit",
-        "details": [
-            "Multi-Format Input Handling: Ingested and parsed raw input from Text files and Web URLs for seamless data processing",
-            "LLM-Based Entity Extraction: Leveraged Google Gemini API to extract entities, attributes, relationships, and contextual links.",
+         "date": "January 2025, March 2025",
+         "org": "C-DAC, Hyderabad",
+         "type": "Main Project",
+         "description": "AI-Powered Knowledge Graph Generator using LLMs and Graph Visualization Application using Streamlit",
+        "features": [
+             "Multi-Format Input Handling: Ingested and parsed raw input from Text files and Web URLs for seamless data processing",
+             "LLM-Based Entity Extraction: Leveraged Google Gemini API to extract entities, attributes, relationships, and contextual links.",
             "Structured Data Storage: Stored parsed information in SQLite3 using a scalable, query-ready schema.",
-            "Interactive Graph Visualization: Built dynamic knowledge graphs with NetworkX and Pyvis,supporting node-click expansion.",
-            "Semantic Relationship Exploration: Enabled deep relationship analysis with continuous graph expansion and case study generation."
+             "Interactive Graph Visualization: Built dynamic knowledge graphs with NetworkX and Pyvis,supporting node-click expansion.",
+             "Semantic Relationship Exploration: Enabled deep relationship analysis with continuous graph expansion and case study generation."
+
         ],
-        "tech": ["Python", "Streamlit", "Google Gemini API", "Sqlite3","Plotly", "NLP", "NetworkX", "BeautifulSoup"],
+        "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Sqlite3","Plotly", "NLP", "NetworkX", "BeautifulSoup"],
         "github": "https://github.com/Sivamahendranath/AI-Knowledge-Graph-Explorer"
     },
     {
         "title": "DocuGenius Pro",
-        "date": "January 2025",
-        "org": "C-DAC, Hyderabad",
-        "type": "Personal Mini Project",
-        "description": "AI-powered document processing application using Streamlit",
-        "details": [
-            "Multi-Format Document Processing: Extracts and processes Text, PDFs, CSVs, and Web URLs",
-            "AI-Powered Analysis: Leverages Google Gemini API for insights, summaries, and answers",
-            "Data Visualization: Creates interactive graphs and statistics for CSV data with Plotly",
+         "date": "January 2025",
+         "org": "C-DAC, Hyderabad",
+         "type": "Personal Mini Project",
+       "description": "AI-powered document processing application using Streamlit",
+        "features": [
+           "Multi-Format Document Processing: Extracts and processes Text, PDFs, CSVs, and Web URLs",
+             "AI-Powered Analysis: Leverages Google Gemini API for insights, summaries, and answers",
+             "Data Visualization: Creates interactive graphs and statistics for CSV data with Plotly",
             "Named Entity Recognition (NER): Identifies key entities from processed documents",
-            "Query-Based Analysis: Allows users to ask questions based on document content",
-            "Customizable Themes & Export Analysis History"
+             "Query-Based Analysis: Allows users to ask questions based on document content",
+             "Customizable Themes & Export Analysis History"
+
         ],
-        "tech": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
-        "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/tree/main/code"
+       "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
+         "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/tree/main/code"
     },
     {
         "title": "Student Performance Dashboards for Exams",
-        "date": "October 2024 - November 2024",
-        "org": "C-DAC, Hyderabad",
+         "date": "October 2024 - November 2024",
+         "org": "C-DAC, Hyderabad",
         "type": "Mini Project",
         "description": "Data visualization dashboards for analyzing student performance",
-        "details": [
+        "features": [
             "Cleaned and processed datasets, converting columns to numeric and handling missing data",
-            "Designed thresholds to classify performance into categories (Fail to Excellent)",
-            "Aggregated and summarized student performance metrics across lab and theory scores",
-            "Created diverse visualizations including pie charts, bar charts, stacked bars, heatmaps",
+             "Designed thresholds to classify performance into categories (Fail to Excellent)",
+             "Aggregated and summarized student performance metrics across lab and theory scores",
+             "Created diverse visualizations including pie charts, bar charts, stacked bars, heatmaps",
             "Implemented advanced visualization techniques for trend analysis and insights",
-            "Optimized data workflows for decision-making"
+             "Optimized data workflows for decision-making"
+
         ],
-        "tech": ["Python", "Pandas", "Matplotlib", "Seaborn", "Data Visualization"],
-        "github": "https://github.com/Sivamahendranath/Student-Performance-Dashboard"
+        "tech_stack": ["Python", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Data Visualization"],
+         "github": "https://github.com/Sivamahendranath/Student-Performance-Dashboard"
     },
     {
         "title": "Andhra Pradesh Southern Power Distribution Company Limited",
-        "date": "April 2024 - May 2024",
-        "org": "KSRM College Of Engineering, Kadapa",
-        "type": "Personal Mini Project",
-        "description": "Electricity Bill Calculator – Streamlit Web Application",
-        "details": [
-            "Multi-Tariff Bill Calculation: Calculates electricity bills for domestic, commercial, and industrial users with tiered and time-of-use tariff logic.",
-            "Interactive Visualizations: Uses Plotly to display consumption patterns and billing breakdown through dynamic charts and graphs.",
-            "PDF Bill Generation: Generates downloadable and printable bills in PDF format using ReportLab for professional documentation.",
-            "Usage History & Trends: Tracks historical electricity usage and visualizes spending trends to help users monitor and manage consumption.",
-            "Responsive UI Design: Built with Streamlit for a mobile-friendly, intuitive interface that works seamlessly across all devices.",
+         "date": "April 2024 - May 2024",
+         "org": "KSRM College Of Engineering, Kadapa",
+         "type": "Personal Mini Project",
+         "description": "Electricity Bill Calculator – Streamlit Web Application",
+        "features": [
+           "Multi-Tariff Bill Calculation: Calculates electricity bills for domestic, commercial, and industrial users with tiered and time-of-use tariff logic.",
+             "Interactive Visualizations: Uses Plotly to display consumption patterns and billing breakdown through dynamic charts and graphs.",
+             "PDF Bill Generation: Generates downloadable and printable bills in PDF format using ReportLab for professional documentation.",
+             "Usage History & Trends: Tracks historical electricity usage and visualizes spending trends to help users monitor and manage consumption.",
+             "Responsive UI Design: Built with Streamlit for a mobile-friendly, intuitive interface that works seamlessly across all devices.",
             "Real-World Utility Integration: Tailored for APSPDCL with accurate tariff modeling, due date logic, and late fee calculations.",
-            "Modular Architecture: Structured with scalable components and future-ready plans including authentication, payments, and multi-language support."
+             "Modular Architecture: Structured with scalable components and future-ready plans including authentication, payments, and multi-language support."
+
         ],
-        "tech": ["Python", "Streamlit", "Plotly", "Pandas", "ReportLab", "HTML/CSS"],
-        "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/app.py",
+        "tech_stack": ["Python", "Streamlit", "Plotly", "Pandas", "ReportLab", "HTML/CSS"],
+         "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/app.py",
     },
     {
         "title": "Exam Proctoring System",
-        "date": "December 2023 - March 2024",
+         "date": "December 2023 - March 2024",
         "org": "KSRM College Of Engineering, Kadapa",
-        "type": "Major Project",
-        "description": "Machine learning application for online exam proctoring",
-        "details": [
+         "type": "Major Project",
+         "description": "Machine learning application for online exam proctoring",
+         "features": [
             "Led a team and developed a machine learning application for online exam proctoring",
-            "Used OpenCV, Dlib, and Face Recognition Library for monitoring candidates",
-            "Monitored candidates' movements and flagged suspicious activities during exams",
-            "Implemented warning mechanisms and automatic termination for suspicious activities",
-            "Generated detailed malpractice reports, including activity graphs, for authorities"
-        ],
-        "tech": ["Python", "OpenCV", "Dlib", "Face Recognition", "Machine Learning"],
+             "Used OpenCV, Dlib, and Face Recognition Library for monitoring candidates",
+             "Monitored candidates' movements and flagged suspicious activities during exams",
+             "Implemented warning mechanisms and automatic termination for suspicious activities",
+             "Generated detailed malpractice reports, including activity graphs, for authorities"
+         ],
+         "tech_stack": ["Python", "OpenCV", "Dlib", "Face Recognition", "Machine Learning"],
         "github": "https://github.com/Sivamahendranath/Exam-Proctoring-System",
+
     },
     {
-        "title": "Smart Fan Energy System",
+         "title": "Smart Fan Energy System",
         "date": "July 2023 - September 2023",
-        "org": "KSRM College Of Engineering, Kadapa",
-        "type": "Minor Project",
-        "description": "IoT-based solution for optimizing energy usage in fan systems",
-        "details": [
-            "Led as Team Leader, Circuit Designer, and Arduino Coder",
-            "Combined hardware and software expertise using Arduino and sensors",
+         "org": "KSRM College Of Engineering, Kadapa",
+         "type": "Minor Project",
+         "description": "IoT-based solution for optimizing energy usage in fan systems",
+         "features": [
+             "Led as Team Leader, Circuit Designer, and Arduino Coder",
+             "Combined hardware and software expertise using Arduino and sensors",
             "Designed a cost-effective, customizable system for automating fan speed and power control",
-            "Created a system that increased energy efficiency by 25% compared to manual fan control",
-            "Implemented automatic temperature-based fan speed adjustment for optimal comfort"
+             "Created a system that increased energy efficiency by 25% compared to manual fan control",
+             "Implemented automatic temperature-based fan speed adjustment for optimal comfort"
         ],
-        "tech": ["Arduino", "IoT", "Sensors"],
-        "github": "https://github.com/Sivamahendranath/Smart-Fan-Energy-System",
+         "tech_stack": ["Arduino", "IoT", "Sensors"],
+         "github": "https://github.com/Sivamahendranath/Smart-Fan-Energy-System",
+
     }
 ]
 
-# Display projects in tabs with images
-tab_titles = [project["title"] for project in projects]
-tabs = st.tabs(tab_titles)
-
-for i, tab in enumerate(tabs):
-    with tab:
-        col1, col2 = st.columns([1, 2])
+# Display projects in a nice format
+for i, project in enumerate(projects):
+    # Create columns for each project
+    if i % 2 == 0:
+        col1, col2 = st.columns(2)
+    
+    with col1 if i % 2 == 0 else col2:
+        # Get project image if available
+        img_path = get_image_path(project_images.get(project["title"], "placeholder.jpg"))
+        if os.path.exists(img_path):
+            project_img = load_image(img_path)
+        else:
+            project_img = get_placeholder_image(400, 300, color="#5846f6")
         
-        with col1:
-            # Load project image
-            img_path = get_image_path(project_images.get(projects[i]["title"], "projects/default.jpg"))
-            if os.path.exists(img_path):
-                proj_img = load_image(img_path)
-            else:
-                proj_img = get_placeholder_image(400, 300, color="#544bf2")
-            st.image(proj_img, use_container_width=True)
-            
-            # Project metadata - Fixed with st.markdown and unsafe_allow_html=True
-            st.markdown(f"""
+        st.image(project_img, caption=project["title"], use_container_width=True)
+        
+        st.markdown(f"""
+        <div class="project-details fade-in">
+            <h3>{project["title"]}</h3>
             <div class="project-meta">
-                <div><i class="fas fa-calendar"></i> <strong>Date:</strong> {projects[i]["date"]}</div>
-                <div><i class="fas fa-building"></i> <strong>Organization:</strong> {projects[i]["org"]}</div>
-                <div><i class="fas fa-tag"></i> <strong>Type:</strong> {projects[i]["type"]}</div>
-                <div><i class="fas fa-link"></i> <strong>GitHub:</strong> <a href="{projects[i]["github"]}" target="_blank">View Project</a></div>
+                <div><i class="far fa-calendar-alt"></i> {project["date"]}</div>
+                <div><i class="fas fa-building"></i> {project["org"]}</div>
+                <div><i class="fas fa-tag"></i> {project["type"]}</div>
             </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            # Project details - Fixed implementation to avoid HTML showing in UI
-            st.markdown(f"<div class='project-description'>{projects[i]['description']}</div>", unsafe_allow_html=True)
-            st.markdown("<h4>Features & Achievements:</h4>", unsafe_allow_html=True)
-            
-            # Using Streamlit's native list component instead of HTML
-            for item in projects[i]["details"]:
-                st.markdown(f"- {item}")
-            
-            # Technologies section - Fixed implementation
-            st.markdown("<h4>Technologies Used:</h4>", unsafe_allow_html=True)
-            
-            # Create tech badges using columns for better layout
-            tech_cols = st.columns(len(projects[i]["tech"]))
-            for idx, tech in enumerate(projects[i]["tech"]):
-                tech_cols[idx].markdown(f"<div class='tech-badge'>{tech}</div>", unsafe_allow_html=True)
+            <p class="project-description">{project["description"]}</p>
+            <h4>Key Features:</h4>
+            <ul class="feature-list">
+                {"".join([f"<li>{feature}</li>" for feature in project["features"]])}
+            </ul>
+            <div class="tech-stack">
+                <h4>Tech Stack:</h4>
+                <div>
+                    {"".join([f'<span class="tech-badge">{tech}</span>' for tech in project["tech_stack"]])}
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <a href="{project["github"]}" target="_blank" style="color: #5846f6;">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Add separator after each row
+    if i % 2 == 1 or i == len(projects) - 1:
+        st.markdown("<hr>", unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
 # SECTION 4: Education
 st.markdown('<div class="section" id="education">', unsafe_allow_html=True)
 st.markdown("<div class='section-header'><h2>Education</h2></div>", unsafe_allow_html=True)
 
-# Load education image
-education_img_path = get_image_path("education.jpg")
-if os.path.exists(education_img_path):
-    edu_img = load_image(education_img_path)
+# Education image
+edu_img_path = get_image_path("education.jpg")
+if os.path.exists(edu_img_path):
+    edu_img = load_image(edu_img_path)
 else:
-    edu_img = get_placeholder_image(800, 300, color="#4d3ef3")
-st.image(edu_img, caption="Educational Background", use_container_width=True)
+    edu_img = get_placeholder_image(600, 400, color="#3527f5")
+st.image(edu_img, caption="Education Journey", use_container_width=True)
 
-# Education Timeline
-st.markdown(f"""
-<div class="timeline fade-in">
-    <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-date">2020 - 2024</div>
-        <div class="timeline-content custom-card">
-            <h3>B.Tech in Computer Science and Engineering</h3>
-            <h4>KSRM College of Engineering, Kadapa, Andhra Pradesh</h4>
-            <div class="education-grade">
-                <i class="fas fa-star"></i> CGPA: 8.3/10
-            </div>
-        </div>
-    </div>
-    <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-date">2018 - 2020</div>
-        <div class="timeline-content custom-card">
-            <h3>Intermediate Education</h3>
-            <h4>JCDR Junior College, Anantapur, Andhra Pradesh</h4>
-            <div class="education-grade">
-                <i class="fas fa-star"></i> CGPA: 6.21/10
-            </div>
-        </div>
-    </div>
-    <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-date">2017 - 2018</div>
-        <div class="timeline-content custom-card">
-            <h3>Board of Secondary Education</h3>
-            <h4>ZP High School, Anantapur, Andhra Pradesh</h4>
-            <div class="education-grade">
-                <i class="fas fa-star"></i> GPA: 9.0/10
-            </div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Education details with timeline
+education = [
+    {
+        "degree": "Bachelor of Engineering in Computer Science",
+        "institution": "KSRM College of Engineering, JNTUA",
+        "location": "Kadapa, Andhra Pradesh",
+        "duration": "2020 - 2024",
+        "grade": "8.3/10 CGPA",
+        "courses": ["programming and Scripting", "Data Structures", "Algorithms", "Database Management", "Web Development", "Machine Learning"]
+    },
+    {
+        "degree": "Intermediate (12th Grade)",
+        "institution": "JCDR Junior Junior College",
+        "location": "Anantapur, Andhra Pradesh",
+        "duration": "2018 - 2020",
+        "grade": "6.21/10 CGPA",
+        "courses": ["Mathematics", "Physics", "Chemistry"]
+    },
+    {
+        "degree": "Secondary School Certificate (10th Grade)",
+        "institution": "ZP High School",
+        "location": "Anantapur, Andhra Pradesh",
+        "duration": "2017 - 2018",
+        "grade": "9.0/10 GPA",
+        "courses": ["Mathematics", "Science", "Languages"]
+    }
+]
 
-# Certifications
-st.markdown("<div class='section-header'><h2>Certifications</h2></div>", unsafe_allow_html=True)
+for i, edu in enumerate(education):
+    st.markdown(f"""
+    <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">{edu["duration"]}</div>
+        <div class="timeline-content custom-card">
+            <h3>{edu["degree"]}</h3>
+            <h4>{edu["institution"]}, {edu["location"]}</h4>
+            <div class="education-grade">
+                <span><i class="fas fa-star"></i> {edu["grade"]}</span>
+            </div>
+            <div class="key-courses" style="margin-top: 10px;">
+                <h5>Key Courses:</h5>
+                <p>{", ".join(edu["courses"])}</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Certifications & Trainings
+st.markdown("<div class='section-header'><h2>Certifications & Trainings</h2></div>", unsafe_allow_html=True)
+
 certifications = [
-    {"title":"Certification of Completion Of WBL Internship [Data Analyst with Python]","issuer": "C-DAC, Hyderabad", "date": "28-April-2025"},
-    {"title": "Certification of Completion, Python 3.X-Programming Course (Hands-On)", "issuer": "Skill Rack", "date": "02-August-2022"},
-    {"title": "Certification of Completion Python-STARTER", "issuer": "SKill Rack", "date": "03-August-2022"},
-    {"title": "Certfifcation of Completion PYTHON3.X - 50 VERY-EASY CHALLENGES", "issuer": "Skill Rack", "date": "03-August-2022"},
+    {
+        "title": "Certification of Completion Of WBL Internship [Data Analyst with Python]",
+        "issuer": "C-DAC, Hyderabad",
+        "date": "28-April-2025"
+    },
+    {
+       "title": "Certification of Completion, Python 3.X-Programming Course (Hands-On)",
+       "issuer": "Skill Rack",
+       "date": "02-August-2022" 
+    },
+    {
+       "title": "Certification of Completion Python-STARTER",
+       "issuer": "SKill Rack", 
+       "date": "03-August-2022"
+    },
+    {
+       "title": "Certfifcation of Completion PYTHON3.X - 50 VERY-EASY CHALLENGES", 
+       "issuer": "Skill Rack",
+       "date": "03-August-2022"
+    }
 ]
 
 col1, col2 = st.columns(2)
@@ -821,121 +1025,158 @@ for i, cert in enumerate(certifications):
         st.markdown(f"""
         <div class="custom-card fade-in">
             <h4>{cert["title"]}</h4>
-            <p><strong>Issuer:</strong> {cert["issuer"]}</p>
-            <p><strong>Date:</strong> {cert["date"]}</p>
+            <p><i class="fas fa-certificate" style="color: #5846f6;"></i> {cert["issuer"]} | {cert["date"]}</p>
         </div>
         """, unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
-
-# SECTION 5: Languages
-st.markdown('<div class="section" id="languages">', unsafe_allow_html=True)
+# Languages
 st.markdown("<div class='section-header'><h2>Languages</h2></div>", unsafe_allow_html=True)
 
 languages = [
-    {"name": "English", "proficiency": "Fluent", "icon": "fas fa-globe-americas"},
-    {"name": "Telugu", "proficiency": "Native", "icon": "fas fa-globe-asia"},
-    {"name": "Hindi", "proficiency": "Intermediate", "icon": "fas fa-globe-asia"},
+    {"name": "English", "proficiency": "Professional", "icon": "fas fa-comment-dots"},
+    {"name": "Telugu", "proficiency": "Native", "icon": "fas fa-comments"},
+    {"name": "Hindi", "proficiency": "Intermediate", "icon": "fas fa-comment-alt"}
 ]
 
-col1, col2, col3, col4 = st.columns(4)
-cols = [col1, col2, col3, col4]
+cols = st.columns(3)
 
 for i, lang in enumerate(languages):
     with cols[i]:
         st.markdown(f"""
         <div class="language-card fade-in">
-            <div class="language-icon"><i class="{lang['icon']}"></i></div>
-            <h4>{lang['name']}</h4>
-            <p>{lang['proficiency']}</p>
+            <div class="language-icon">
+                <i class="{lang['icon']}"></i>
+            </div>
+            <h4>{lang["name"]}</h4>
+            <p>{lang["proficiency"]}</p>
         </div>
         """, unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 
-# SECTION 6: Contact
+# SECTION 5: Contact Me
 st.markdown('<div class="section" id="contact">', unsafe_allow_html=True)
 st.markdown("<div class='section-header'><h2>Contact Me</h2></div>", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([2, 1])
 
 with col1:
-    # Contact form
+    # Contact form with validation
     st.markdown("<h3>Send me a message</h3>", unsafe_allow_html=True)
     
-    with st.form("contact_form"):
-        st.text_input("Name")
-        st.text_input("Email")
-        st.text_area("Message")
-        submit_button = st.form_submit_button("Send Message")
+    # Initialize session state variables for form validation
+    if 'name_error' not in st.session_state:
+        st.session_state.name_error = ""
+    if 'email_error' not in st.session_state:
+        st.session_state.email_error = ""
+    if 'message_error' not in st.session_state:
+        st.session_state.message_error = ""
+    if 'form_submitted' not in st.session_state:
+        st.session_state.form_submitted = False
+    
+    # Show success message if form has been submitted
+    if st.session_state.form_submitted:
+        st.markdown('<div class="form-success">Thank you for your message! I will get back to you soon.</div>', unsafe_allow_html=True)
+        st.session_state.form_submitted = False
+    
+    # Create form
+    with st.form("contact_form", clear_on_submit=True):
+        # Name field with validation feedback
+        st.markdown('<label class="required-field">Name</label>', unsafe_allow_html=True)
+        name = st.text_input("", placeholder="Your name", key="name")
+        if st.session_state.name_error:
+            st.markdown(f'<div class="form-error">{st.session_state.name_error}</div>', unsafe_allow_html=True)
         
-        if submit_button:
-            st.success("Thanks for your message! I'll get back to you soon.")
+        # Email field with validation feedback
+        st.markdown('<label class="required-field">Email</label>', unsafe_allow_html=True)
+        email = st.text_input("", placeholder="Your email", key="email")
+        if st.session_state.email_error:
+            st.markdown(f'<div class="form-error">{st.session_state.email_error}</div>', unsafe_allow_html=True)
+        
+        # Message field with validation feedback
+        st.markdown('<label class="required-field">Message</label>', unsafe_allow_html=True)
+        message = st.text_area("", placeholder="Your message", height=150, key="message")
+        if st.session_state.message_error:
+            st.markdown(f'<div class="form-error">{st.session_state.message_error}</div>', unsafe_allow_html=True)
+        
+        # Submit button
+        submitted = st.form_submit_button("Send Message")
+        
+        # Form validation
+        if submitted:
+            # Reset error messages
+            st.session_state.name_error = ""
+            st.session_state.email_error = ""
+            st.session_state.message_error = ""
+            
+            # Validate fields
+            valid_form = True
+            if not name.strip():
+                st.session_state.name_error = "Please enter your name."
+                valid_form = False
+            
+            if not email.strip():
+                st.session_state.email_error = "Please enter your email."
+                valid_form = False
+            elif not is_valid_email(email):
+                st.session_state.email_error = "Please enter a valid email address."
+                valid_form = False
+            
+            if not message.strip():
+                st.session_state.message_error = "Please enter your message."
+                valid_form = False
+            
+            # Process form if valid
+            if valid_form:
+                # Save message to database
+                save_message_to_db(name, email, message)
+                
+                # Send email notification (optional)
+                try:
+                    send_email_notification(name, email, message)
+                except Exception as e:
+                    st.warning(f"Email notification could not be sent: {e}")
+                
+                # Set success message flag
+                st.session_state.form_submitted = True
+                
+                # Rerun to show success message
+                st.rerun()
 
 with col2:
-    # Contact info
-    st.markdown("<h3>Contact Information</h3>", unsafe_allow_html=True)
+    st.markdown("### Contact Information")
     
-    st.markdown("""
-    <div class="contact-info fade-in">
-        <div class="contact-item">
-            <i class="fas fa-envelope"></i>
-            <div>
-                <h4>Email</h4>
-                <p>mahendraragimanu2@gmail.com</p>
-            </div>
-        </div>
-        <div class="contact-item">
-            <i class="fas fa-phone"></i>
-            <div>
-                <h4>Phone</h4>
-                <p>+91 8106442744</p>
-            </div>
-        </div>
-        <div class="contact-item">
-            <i class="fas fa-map-marker-alt"></i>
-            <div>
-                <h4>Location</h4>
-                <p>Anantapur, Andhra Pradesh, India</p>
-            </div>
-        </div>
-    </div>
+    # Location
+    st.markdown("#### Location")
+    st.write("Anantapur, Andhra Pradesh, India")
     
-    <div class="social-links">
-        <h4>Social Media</h4>
-        <a href="https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/" target="_blank"><i class="fab fa-linkedin fa-2x"></i></a>
-        <a href="https://github.com/Sivamahendranath" target="_blank"><i class="fab fa-github fa-2x"></i></a>
-    </div>
-    """, unsafe_allow_html=True)
+    # Email
+    st.markdown("#### Email")
+    st.write("mahendraragimanu2@gmail.com")
+    
+    # Phone
+    st.markdown("#### Phone")
+    st.write("+91 8106442744")
+    
+    # Social links using columns instead of HTML
+    st.markdown("#### Connect With Me")
+    social_cols = st.columns(3)
+    
+    with social_cols[0]:
+        st.markdown("[LinkedIn](https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/)")
+    
+    with social_cols[1]:
+        st.markdown("[GitHub](https://github.com/Sivamahendranath)")
+    
+    with social_cols[2]:
+        st.markdown("[Email](mailto:mahendraragimanu2@gmail.com)")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Footer section
+# Footer
 st.markdown("""
 <div class="footer">
-    <p>© 2025 Sivamahendranath Ragimanu. All rights reserved.<br>@2025 Copy Right</p>
-    <div>
-        <a href="#home">Home</a> | 
-        <a href="#skills">Skills</a> | 
-        <a href="#projects">Projects</a> | 
-        <a href="#education">Education</a> | 
-        <a href="#contact">Contact</a>
-    </div>
+    <p>&copy;* 2025 Sivamahendranath Ragimanu | @copy Right 2025</p>
 </div>
-""", unsafe_allow_html=True)
-
-# Add smooth scrolling JS
-st.markdown("""
-<script>
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
-});
-</script>
 """, unsafe_allow_html=True)
