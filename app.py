@@ -506,7 +506,7 @@ with col1:
     st.markdown("""
     <div class="hero-section fade-in">
         <h1>Sivamahendranath <span class="highlight">Ragimanu</span></h1>
-        <h3>🎓 Computer Science Graduate | Python | AI | Data Analyst | Python Developer | Machine Learning Enthusiast</h3>
+        <h3>🎓 Computer Science Graduate | Python Developer | Data Analyst | AI | Machine Learning Enthusiast</h3>
         <p class="lead-text">Aspiring AI & Data Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4), and RAG pipelines. Interned at C-DAC Hyderabad, where I built AI-powered knowledge graphs, semantic search tools, and document analysis apps using Streamlit, SQLite3, and NetworkX.
 Strong in data visualization, NLP, and automated data processing. Prior internship at Oppo Mobiles enhanced my skills in testing, collaboration, and debugging.
 
