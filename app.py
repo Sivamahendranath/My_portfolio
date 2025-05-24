@@ -542,7 +542,6 @@ with col2:
     <div class="about-text fade-in">
         <p>Aspiring AI & Data Science Professional | Python Developer | NLP & LLM Specialist | RAG & Streamlit Expert
 I am a highly motivated and results-driven AI & Data Science professional with practical experience in developing intelligent, offline-first applications using Python, Large Language Models (LLMs) like GPT-4 and LLaMA2, and advanced Natural Language Processing (NLP) techniques.
-
 During my internship at C-DAC Hyderabad, I successfully:
 Developed an offline document chatbot with voice-enabled natural language querying using LangChain, Whisper, and Ollama—enhancing user privacy and accessibility.
 Engineered a knowledge graph builder and visualizer leveraging GPT-4, NetworkX, and SQLite3 to transform unstructured data into actionable insights.
@@ -552,8 +551,8 @@ Previously, at Oppo Mobiles India, I gained valuable experience in software test
 Core Skills & Technologies:
 Python | GPT-4 | LLaMA2 | LangChain | Whisper | Ollama | NLP | RAG Pipelines | Streamlit | SQLite3 | NetworkX | Pyvis | Data Visualization | Pandas | Matplotlib | OpenCV | Face Recognition
 I am passionate about building scalable AI-powered solutions that emphasize data privacy, interactive user experience, and real-world impact.
-Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP Research </p>
-    </div>
+Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP Research. </p>
+</div>
     """, unsafe_allow_html=True)
     
     # Add key points separately
