@@ -506,9 +506,11 @@ with col1:
     st.markdown("""
     <div class="hero-section fade-in">
         <h1>Sivamahendranath <span class="highlight">Ragimanu</span></h1>
-        <h3>Data Analyst | Python Developer | Machine Learning Enthusiast</h3>
-        <p class="lead-text">Fresher Engineer with a solid foundation in Python, web development, data analysis, and machine learning. 
-        Adept at leading projects, collaborating with cross-functional teams, and delivering impactful solutions.</p>
+        <h3>🎓 Computer Science Graduate | Python | AI | Data Analyst | Python Developer | Machine Learning Enthusiast</h3>
+        <p class="lead-text">Aspiring AI & Data Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4), and RAG pipelines. Interned at C-DAC Hyderabad, where I built AI-powered knowledge graphs, semantic search tools, and document analysis apps using Streamlit, SQLite3, and NetworkX.
+Strong in data visualization, NLP, and automated data processing. Prior internship at Oppo Mobiles enhanced my skills in testing, collaboration, and debugging.
+
+I'm driven to build smart, scalable, and impactful AI solutions that turn raw data into insights. Open to roles in AI Engineering, Data Science, or Python Development.</p>
     </div>
     """, unsafe_allow_html=True)
 
