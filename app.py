@@ -540,10 +540,19 @@ with col1:
 with col2:
     st.markdown("""
     <div class="about-text fade-in">
-        <p>Fresher Engineer with strong skills in Python, web development, data analysis, and machine learning. 
-        Experienced in working with LLMs and RAG pipelines for intelligent data solutions. Proven ability to lead 
-        projects, collaborate across teams, and build impactful tools. Quick learner with strong problem-solving and communication skills,
-        eager to grow in a fast-paced, innovative environment. </p>
+        <p>Aspiring AI & Data Science Professional | Python Developer | NLP & LLM Specialist | RAG & Streamlit Expert
+I am a highly motivated and results-driven AI & Data Science professional with practical experience in developing intelligent, offline-first applications using Python, Large Language Models (LLMs) like GPT-4 and LLaMA2, and advanced Natural Language Processing (NLP) techniques.
+
+During my internship at C-DAC Hyderabad, I successfully:
+Developed an offline document chatbot with voice-enabled natural language querying using LangChain, Whisper, and Ollama—enhancing user privacy and accessibility.
+Engineered a knowledge graph builder and visualizer leveraging GPT-4, NetworkX, and SQLite3 to transform unstructured data into actionable insights.
+Implemented Retrieval-Augmented Generation (RAG) pipelines and semantic search tools for efficient information retrieval and data analysis.
+Previously, at Oppo Mobiles India, I gained valuable experience in software testing, bug tracking, and cross-team collaboration, sharpening my problem-solving and debugging skills.
+
+Core Skills & Technologies:
+Python | GPT-4 | LLaMA2 | LangChain | Whisper | Ollama | NLP | RAG Pipelines | Streamlit | SQLite3 | NetworkX | Pyvis | Data Visualization | Pandas | Matplotlib | OpenCV | Face Recognition
+I am passionate about building scalable AI-powered solutions that emphasize data privacy, interactive user experience, and real-world impact.
+Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP Research </p>
     </div>
     """, unsafe_allow_html=True)
     
