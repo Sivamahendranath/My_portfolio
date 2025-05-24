@@ -547,7 +547,7 @@ Interned at C-DAC Hyderabad, developing AI-powered solutions focused on data pri
 Core skills: Python | GPT-4 | LangChain | Whisper | Ollama | NLP | SQLite3 | NetworkX | Data Visualization | OpenCV
 
 Open to roles in AI Engineering, Data Science, and Python Development.
-I am passionate about building scalable AI-powered solutions that emphasize data privacy, interactive user experience, and real-world impact.
+I am passionate about building scalable AI-powered solutions that emphasize data privacy, interactive user experience, and real-world impact.<br>
 Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP Research. </p>
 </div>
     """, unsafe_allow_html=True)
