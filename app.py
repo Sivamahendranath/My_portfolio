@@ -13,18 +13,19 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import re
 import json
+import random
 
 # Page configuration
 st.set_page_config(
     page_title="Sivamahendranath Ragimanu | Portfolio",
     page_icon="👨‍💻",
     layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
 # Function to get image path
 def get_image_path(relative_path):
     """Get absolute path for an image based on relative path"""
-    # Define the base path for your images
-    # When deployed, this should be relative to your app's main script
     base_path = Path(__file__).parent / "images"
     return str(base_path / relative_path)
 
@@ -35,7 +36,6 @@ def load_image(image_path):
         return Image.open(image_path)
     except FileNotFoundError:
         st.warning(f"Image not found: {image_path}")
-        # Return a placeholder image instead
         return get_placeholder_image(400, 300, color="#5846f6")
     except Exception as e:
         st.warning(f"Error loading image {image_path}: {str(e)}")
@@ -172,194 +172,620 @@ def is_valid_email(email):
     email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return bool(re.match(email_pattern, email))
 
+# NEW: Particle animation background using Streamlit components
+def create_particle_background():
+    """Create an animated particle background using HTML/CSS/JS"""
+    particle_html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            #particles-js {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: -1;
+            }
+            .stApp {
+                background: transparent;
+            }
+            .main .block-container {
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 10px;
+                padding: 2rem;
+                margin-top: 1rem;
+                backdrop-filter: blur(5px);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="particles-js"></div>
+        <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+        <script>
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#5846f6"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": false
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#5846f6",
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+    </html>
+    """
+    return particle_html
+
+# NEW: Animated gradient background option
+def create_gradient_background():
+    """Create an animated gradient background using CSS"""
+    gradient_css = """
+    <style>
+    .stApp {
+        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+    }
+    
+    @keyframes gradient {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+    
+    .main .block-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-top: 1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+    """
+    return gradient_css
+
+# NEW: Floating animation for elements
+def add_floating_animation():
+    """Add floating animation to elements"""
+    floating_css = """
+    <style>
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+        100% {
+            transform: translateY(0px);
+        }
+    }
+    
+    .floating {
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .typewriter h1 {
+        overflow: hidden;
+        border-right: .15em solid #5846f6;
+        white-space: nowrap;
+        margin: 0 auto;
+        animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    }
+    
+    @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+    }
+    
+    @keyframes blink-caret {
+        from, to { border-color: transparent }
+        50% { border-color: #5846f6; }
+    }
+    </style>
+    """
+    return floating_css
+
+# NEW: Interactive hover effects
+def add_hover_effects():
+    """Add interactive hover effects to cards and buttons"""
+    hover_css = """
+    <style>
+    .hover-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .glow-on-hover {
+        transition: all 0.3s ease;
+    }
+    
+    .glow-on-hover:hover {
+        box-shadow: 0 0 15px #5846f6;
+    }
+    
+    .fade-in-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    
+    .is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    </style>
+    """
+    return hover_css
+
+# NEW: Scroll progress indicator
+def create_scroll_progress():
+    """Create a scroll progress indicator"""
+    progress_js = """
+    <script>
+    window.onscroll = function() {
+        var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var scrolled = (winScroll / height) * 100;
+        document.getElementById("progressBar").style.width = scrolled + "%";
+    };
+    </script>
+    <style>
+    .progress-container {
+        width: 100%;
+        height: 4px;
+        background: #f1f1f1;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+    }
+    
+    .progress-bar {
+        height: 4px;
+        background: #5846f6;
+        width: 0%;
+        transition: width 0.3s;
+    }
+    </style>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    """
+    return progress_js
+
 # Include Font Awesome for icons
 st.markdown("""
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 """, unsafe_allow_html=True)
 
-# Improved CSS styling
-st.markdown("""
+# NEW: Add all animation and effect styles
+st.markdown(add_floating_animation(), unsafe_allow_html=True)
+st.markdown(add_hover_effects(), unsafe_allow_html=True)
+
+# Create a simple sidebar for theme selection
+with st.sidebar:
+    st.title("🎨 Theme & Effects")
+    
+    # Background selection
+    background_choice = st.selectbox("Choose Background", ["Particle Animation", "Gradient Animation", "Simple White"])
+    
+    # Animation toggle
+    enable_animations = st.checkbox("Enable Animations", value=True)
+    
+    # Apply theme via session state
+    if 'background' not in st.session_state:
+        st.session_state.background = background_choice
+    
+    if st.session_state.background != background_choice:
+        st.session_state.background = background_choice
+        st.rerun()
+    
+    # Add social links in sidebar
+    st.markdown("---")
+    st.markdown("### 🔗 Connect With Me")
+    cols = st.columns(3)
+    cols[0].markdown(f'<a href="https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/" target="_blank"><i class="fab fa-linkedin fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+    cols[1].markdown(f'<a href="https://github.com/Sivamahendranath" target="_blank"><i class="fab fa-github fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+    cols[2].markdown(f'<a href="mailto:mahendraragimanu2@gmail.com" target="_blank"><i class="fas fa-envelope fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+
+# Apply selected background
+if st.session_state.background == "Particle Animation":
+    from streamlit.components.v1 import html
+    particle_html = create_particle_background()
+    html(particle_html, height=0, width=0)
+elif st.session_state.background == "Gradient Animation":
+    st.markdown(create_gradient_background(), unsafe_allow_html=True)
+
+# Add scroll progress indicator
+st.markdown(create_scroll_progress(), unsafe_allow_html=True)
+
+# Enhanced CSS styling with animations
+st.markdown(f"""
 <style>
-    /* Basic styling */
-    .hero-section h1 {
+    /* Basic styling with enhanced animations */
+    .hero-section h1 {{
         font-size: 3rem;
         font-weight: 700;
-    }
-    .highlight {
+        background: linear-gradient(45deg, #5846f6, #e73c7e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }}
+    .highlight {{
         color: #5846f6;
-    }
-    .section-header h2 {
+    }}
+    .section-header h2 {{
         border-bottom: 2px solid #5846f6;
         padding-bottom: 10px;
         margin-top: 30px;
-    }
-    .custom-card {
+        position: relative;
+        overflow: hidden;
+    }}
+    .section-header h2::after {{
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0%;
+        height: 2px;
+        background: linear-gradient(90deg, #5846f6, #e73c7e);
+        animation: expandLine 2s ease-in-out forwards;
+    }}
+    @keyframes expandLine {{
+        from {{ width: 0%; }}
+        to {{ width: 100%; }}
+    }}
+    .custom-card {{
         border-left: 4px solid #5846f6;
-        padding: 15px;
+        padding: 20px;
         margin: 15px 0;
-        background-color: rgba(88, 70, 246, 0.05);
-    }
-    .fade-in {
+        background: linear-gradient(135deg, rgba(88, 70, 246, 0.05) 0%, rgba(231, 60, 126, 0.05) 100%);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }}
+    .custom-card:hover {{
+        transform: translateX(10px);
+        box-shadow: 0 10px 30px rgba(88, 70, 246, 0.2);
+    }}
+    .fade-in {{
         animation: fadeIn 1s ease-in;
-    }
-    .skill-container {
+    }}
+    @keyframes fadeIn {{
+        from {{ opacity: 0; transform: translateY(30px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    .skill-container {{
         margin: 15px 0;
-    }
-    .skill-bar-container {
+    }}
+    .skill-bar-container {{
         background-color: #e0e0e0;
         border-radius: 10px;
         height: 10px;
         width: 100%;
-    }
-    .skill-bar {
-        background-color: #5846f6;
+        overflow: hidden;
+    }}
+    .skill-bar {{
+        background: linear-gradient(90deg, #5846f6, #e73c7e);
         border-radius: 10px;
         height: 10px;
-    }
-    .timeline-item {
+        transform: scaleX(0);
+        transform-origin: left;
+        animation: growBar 2s ease-in-out forwards;
+    }}
+    @keyframes growBar {{
+        to {{ transform: scaleX(1); }}
+    }}
+    .timeline-item {{
         position: relative;
         padding-left: 30px;
         margin-bottom: 30px;
-    }
-    .timeline-dot {
+    }}
+    .timeline-dot {{
         position: absolute;
         left: 0;
         top: 5px;
         width: 15px;
         height: 15px;
         border-radius: 50%;
-        background-color: #5846f6;
-    }
-    .timeline-date {
+        background: linear-gradient(45deg, #5846f6, #e73c7e);
+        animation: pulse 2s infinite;
+    }}
+    .timeline-date {{
         font-weight: bold;
         margin-bottom: 5px;
-    }
-    .timeline-content {
+        color: #5846f6;
+    }}
+    .timeline-content {{
         margin-left: 10px;
-    }
-    .footer {
+    }}
+    .footer {{
         margin-top: 50px;
         padding: 20px 0;
         text-align: center;
         border-top: 1px solid #e0e0e0;
-    }
-    .key-points {
+    }}
+    .key-points {{
         margin-top: 15px;
-    }
-    .key-point {
+    }}
+    .key-point {{
         margin-bottom: 8px;
-    }
-    .key-point i {
+        padding: 10px;
+        border-radius: 5px;
+        background: rgba(88, 70, 246, 0.1);
+        transition: all 0.3s ease;
+    }}
+    .key-point:hover {{
+        background: rgba(88, 70, 246, 0.2);
+        transform: translateX(5px);
+    }}
+    .key-point i {{
         margin-right: 10px;
         color: #5846f6;
-    }
-    .project-meta {
+    }}
+    .project-meta {{
         margin: 20px 0;
-    }
-    .project-meta div {
+    }}
+    .project-meta div {{
         margin-bottom: 10px;
-    }
-    .project-meta i {
+        padding: 5px 10px;
+        background: rgba(88, 70, 246, 0.1);
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }}
+    .project-meta div:hover {{
+        background: rgba(88, 70, 246, 0.2);
+        transform: translateX(5px);
+    }}
+    .project-meta i {{
         margin-right: 10px;
         color: #5846f6;
-    }
-    .tech-stack {
+    }}
+    .tech-stack {{
         margin-top: 20px;
-    }
-    .tech-badge {
+    }}
+    .tech-badge {{
         display: inline-block;
-        background-color: rgba(88, 70, 246, 0.1);
-        color: #5846f6;
-        padding: 5px 10px;
+        background: linear-gradient(45deg, #5846f6, #e73c7e);
+        color: white;
+        padding: 5px 15px;
         margin: 5px;
-        border-radius: 15px;
-    }
-    .project-icon {
+        border-radius: 20px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }}
+    .tech-badge:hover {{
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(88, 70, 246, 0.3);
+    }}
+    .project-icon {{
         text-align: center;
         color: #5846f6;
         margin: 20px 0;
-    }
-    .project-details h3 {
+    }}
+    .project-details h3 {{
         margin-bottom: 15px;
-    }
-    .project-description {
+        color: #5846f6;
+        position: relative;
+        display: inline-block;
+    }}
+    .project-details h3::after {{
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #5846f6, #e73c7e);
+        transition: width 0.3s ease;
+    }}
+    .project-details:hover h3::after {{
+        width: 100%;
+    }}
+    .project-description {{
         font-style: italic;
         margin-bottom: 20px;
-    }
-    .feature-list li {
-        margin-bottom: 10px;
-    }
-    .education-grade {
-        margin-top: 10px;
-    }
-    .education-grade i {
-        color: gold;
-    }
-    .language-card {
-        text-align: center;
         padding: 15px;
-        background-color: rgba(88, 70, 246, 0.05);
+        background: rgba(88, 70, 246, 0.05);
         border-radius: 10px;
+        border-left: 4px solid #5846f6;
+    }}
+    .feature-list li {{
+        margin-bottom: 10px;
+        padding-left: 10px;
+        border-left: 2px solid transparent;
+        transition: all 0.3s ease;
+    }}
+    .feature-list li:hover {{
+        border-left: 2px solid #5846f6;
+        background: rgba(88, 70, 246, 0.05);
+        padding-left: 15px;
+    }}
+    .education-grade {{
+        margin-top: 10px;
+    }}
+    .education-grade i {{
+        color: gold;
+    }}
+    .language-card {{
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(88, 70, 246, 0.1) 0%, rgba(231, 60, 126, 0.1) 100%);
+        border-radius: 15px;
         margin: 10px;
-    }
-    .language-icon {
+        transition: all 0.3s ease;
+    }}
+    .language-card:hover {{
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(88, 70, 246, 0.2);
+    }}
+    .language-icon {{
         font-size: 2rem;
         margin-bottom: 10px;
-    }
-    .contact-info {
+        color: #5846f6;
+    }}
+    .contact-info {{
         margin: 20px 0;
-    }
-    .contact-item {
+    }}
+    .contact-item {{
         display: flex;
         align-items: flex-start;
         margin-bottom: 20px;
-    }
-    .contact-item i {
+        padding: 15px;
+        background: rgba(88, 70, 246, 0.05);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }}
+    .contact-item:hover {{
+        background: rgba(88, 70, 246, 0.1);
+        transform: translateX(10px);
+    }}
+    .contact-item i {{
         font-size: 1.5rem;
         color: #5846f6;
         margin-right: 15px;
         margin-top: 5px;
-    }
-    .social-links {
+    }}
+    .social-links {{
         margin-top: 15px;
-    }
-    .social-links a {
+    }}
+    .social-links a {{
         margin: 0 10px;
         color: #5846f6;
         text-decoration: none;
-    }
-    .accomplishment-card {
+        transition: all 0.3s ease;
+    }}
+    .social-links a:hover {{
+        color: #e73c7e;
+        transform: scale(1.2);
+    }}
+    .accomplishment-card {{
         display: flex;
         align-items: flex-start;
-        background-color: rgba(88, 70, 246, 0.05);
-        padding: 15px;
-        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(88, 70, 246, 0.1) 0%, rgba(231, 60, 126, 0.1) 100%);
+        padding: 20px;
+        border-radius: 15px;
         margin-bottom: 15px;
-    }
-    .accomplishment-icon {
+        transition: all 0.3s ease;
+    }}
+    .accomplishment-card:hover {{
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(88, 70, 246, 0.2);
+    }}
+    .accomplishment-icon {{
         font-size: 1.5rem;
         color: #5846f6;
         margin-right: 15px;
-    }
-    .soft-skill-card {
+    }}
+    .soft-skill-card {{
         text-align: center;
-        padding: 15px;
-        background-color: rgba(88, 70, 246, 0.05);
-        border-radius: 10px;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(88, 70, 246, 0.1) 0%, rgba(231, 60, 126, 0.1) 100%);
+        border-radius: 15px;
         margin: 10px;
-    }
-    .soft-skill-card i {
+        transition: all 0.3s ease;
+    }}
+    .soft-skill-card:hover {{
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(88, 70, 246, 0.2);
+    }}
+    .soft-skill-card i {{
         font-size: 1.5rem;
         color: #5846f6;
         margin-bottom: 10px;
-    }
-    .profile-img {
+    }}
+    .profile-img {{
         border-radius: 50%;
         max-width: 100%;
         border: 3px solid #5846f6;
-    }
-    .contact-button {
-        background-color: #5846f6;
+        transition: all 0.3s ease;
+    }}
+    .profile-img:hover {{
+        border-color: #e73c7e;
+        transform: scale(1.05);
+    }}
+    .contact-button {{
+        background: linear-gradient(45deg, #5846f6, #e73c7e);
         color: white;
         padding: 12px 24px;
         border-radius: 25px;
@@ -371,133 +797,143 @@ st.markdown("""
         cursor: pointer;
         border: none;
         transition: all 0.3s ease;
-    }
-    .contact-button:hover {
-        background-color: #4835d4;
+    }}
+    .contact-button:hover {{
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .section-divider {
+        box-shadow: 0 8px 20px rgba(88, 70, 246, 0.3);
+    }}
+    .section-divider {{
         height: 50px;
-    }
-    .section {
+    }}
+    .section {{
         padding: 30px 0;
         border-bottom: 1px solid #e0e0e0;
-    }
-    .section:last-child {
+    }}
+    .section:last-child {{
         border-bottom: none;
-    }
-    .image-debug {
+    }}
+    .image-debug {{
         padding: 10px;
         background-color: #f0f0f0;
         border-radius: 5px;
         margin-bottom: 10px;
-    }
-    /* NEW: Skill category styling */
-    .skill-category {
+    }}
+    .skill-category {{
         margin-bottom: 30px;
-    }
-    .skill-category h3 {
+    }}
+    .skill-category h3 {{
         color: #5846f6;
         border-bottom: 1px solid rgba(88, 70, 246, 0.3);
         padding-bottom: 8px;
         margin-bottom: 15px;
-    }
-    .skill-category-icon {
+        position: relative;
+    }}
+    .skill-category h3::after {{
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #5846f6, #e73c7e);
+        animation: expandLine 2s ease-in-out forwards;
+        animation-delay: 0.5s;
+    }}
+    .skill-category-icon {{
         font-size: 1.8rem;
         margin-right: 10px;
         color: #5846f6;
         vertical-align: middle;
-    }
-    /* Form validation styles */
-    .form-error {
+    }}
+    .form-error {{
         color: #ff4444;
         font-size: 0.9rem;
         margin-top: 2px;
-    }
-    .form-success {
+    }}
+    .form-success {{
         color: #4CAF50;
         padding: 10px;
         border-radius: 5px;
         background-color: rgba(76, 175, 80, 0.1);
         border-left: 4px solid #4CAF50;
         margin: 10px 0;
-    }
-    .required-field:after {
+    }}
+    .required-field:after {{
         content: " *";
         color: #ff4444;
-    }
+    }}
+    
+    /* NEW: Staggered animations for list items */
+    .stagger-item {{
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.6s ease forwards;
+    }}
+    
+    @keyframes fadeInUp {{
+        to {{
+            opacity: 1;
+            transform: translateY(0);
+        }}
+    }}
+    
+    /* NEW: Glitch effect for headers */
+    .glitch {{
+        position: relative;
+        display: inline-block;
+    }}
+    
+    .glitch::before,
+    .glitch::after {{
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }}
+    
+    .glitch::before {{
+        left: 2px;
+        text-shadow: -2px 0 #ff00c1;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim 5s infinite linear alternate-reverse;
+    }}
+    
+    .glitch::after {{
+        left: -2px;
+        text-shadow: -2px 0 #00fff9;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim2 5s infinite linear alternate-reverse;
+    }}
+    
+    @keyframes glitch-anim {{
+        0% {{ clip: rect(31px, 9999px, 13px, 0); }}
+        5% {{ clip: rect(64px, 9999px, 25px, 0); }}
+        10% {{ clip: rect(9px, 9999px, 10px, 0); }}
+        15% {{ clip: rect(42px, 9999px, 30px, 0); }}
+        20% {{ clip: rect(97px, 9999px, 61px, 0); }}
+        25% {{ clip: rect(80px, 9999px, 2px, 0); }}
+        30% {{ clip: rect(47px, 9999px, 84px, 0); }}
+        35% {{ clip: rect(48px, 9999px, 42px, 0); }}
+        40% {{ clip: rect(23px, 9999px, 53px, 0); }}
+        45% {{ clip: rect(38px, 9999px, 32px, 0); }}
+        50% {{ clip: rect(40px, 9999px, 35px, 0); }}
+        55% {{ clip: rect(43px, 9999px, 60px, 0); }}
+        60% {{ clip: rect(89px, 9999px, 33px, 0); }}
+        65% {{ clip: rect(20px, 9999px, 33px, 0); }}
+        70% {{ clip: rect(34px, 9999px, 65px, 0); }}
+        75% {{ clip: rect(44px, 9999px, 93px, 0); }}
+        80% {{ clip: rect(56px, 9999px, 50px, 0); }}
+        85% {{ clip: rect(64px, 9999px, 63px, 0); }}
+        90% {{ clip: rect(59px, 9999px, 67px, 0); }}
+        95% {{ clip: rect(22px, 9999px, 16px, 0); }}
+        100% {{ clip: rect(66px, 9999px, 82px, 0); }}
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# Create a simple sidebar for theme selection
-with st.sidebar:
-    st.title("Theme Settings")
-    theme = st.selectbox("Choose Theme", ["Blue", "Green"])
-    
-    # Apply theme via session state
-    if 'theme' not in st.session_state:
-        st.session_state.theme = theme
-    
-    if st.session_state.theme != theme:
-        st.session_state.theme = theme
-        st.rerun()
-    # Add social links in sidebar
-    st.markdown("---")
-    cols = st.columns(3)
-    cols[0].markdown(f'<a href="https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/" target="_blank"><i class="fab fa-linkedin fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
-    cols[1].markdown(f'<a href="https://github.com/Sivamahendranath" target="_blank"><i class="fab fa-github fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
-    cols[2].markdown(f'<a href="mailto:mahendraragimanu2@gmail.com" target="_blank"><i class="fas fa-envelope fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
-
-# Apply the selected theme
-theme_colors = {
-    "Blue": {"bg": "#0a192f", "text": "#e6f1ff", "accent": "#64ffda"},
-    "Green": {"bg": "#0f1a0f", "text": "#e6ffe6", "accent": "#4dff4d"}
-}
-
-# Apply theme colors via CSS
-selected_theme = theme_colors[st.session_state.theme]
-st.markdown(f"""
-<style>
-    .stApp {{
-        background-color: {selected_theme["bg"]};
-        color: {selected_theme["text"]};
-    }}
-    .highlight, .section-header h2 {{
-        color: {selected_theme["accent"]} !important;
-    }}
-    .custom-card {{
-        border-left: 4px solid {selected_theme["accent"]};
-    }}
-    .skill-bar {{
-        background-color: {selected_theme["accent"]};
-    }}
-    .timeline-dot {{
-        background-color: {selected_theme["accent"]};
-    }}
-    .tech-badge {{
-        color: {selected_theme["accent"]};
-    }}
-    .project-icon {{
-        color: {selected_theme["accent"]};
-    }}
-    .contact-item i {{
-        color: {selected_theme["accent"]};
-    }}
-    .social-links a {{
-        color: {selected_theme["accent"]};
-    }}
-    .contact-button {{
-        background-color: {selected_theme["accent"]};
-    }}
-    .contact-button:hover {{
-        background-color: {selected_theme["accent"]};
-        opacity: 0.9;
-    }}
-</style>
-""", unsafe_allow_html=True)
-
-# Main content - Now in scrolling format
+# Main content - Now in scrolling format with enhanced animations
 # SECTION 1: Home
 st.markdown('<div class="section" id="home">', unsafe_allow_html=True)
 col1, col2 = st.columns([2, 1])
@@ -505,7 +941,7 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.markdown("""
     <div class="hero-section fade-in">
-        <h1>Sivamahendranath <span class="highlight">Ragimanu</span></h1>
+        <h1 class="glitch" data-text="Sivamahendranath Ragimanu">Sivamahendranath Ragimanu</h1>
         <h3>🎓 Computer Science Graduate | Python Developer | Data Analyst | AI | Machine Learning Enthusiast</h3>
         <p class="lead-text">Aspiring AI & Data Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4), and RAG pipelines. Interned at C-DAC Hyderabad, where I built AI-powered knowledge graphs, semantic search tools, and document analysis apps using Streamlit, SQLite3, and NetworkX.
 Strong in data visualization, NLP, and automated data processing. Prior internship at Oppo Mobiles enhanced my skills in testing, collaboration, and debugging.
@@ -515,13 +951,13 @@ I'm driven to build smart, scalable, and impactful AI solutions that turn raw da
     """, unsafe_allow_html=True)
 
 with col2:
-    # Load profile image
+    # Load profile image with floating animation
     profile_image_path = get_image_path("profile.jpeg")
     if os.path.exists(profile_image_path):
         profile_img = load_image(profile_image_path)
     else:
         profile_img = get_placeholder_image(300, 300, color="#5846f6")
-    st.image(profile_img, use_container_width=True)
+    st.image(profile_img, use_container_width=True, output_format="PNG")
 
 # About Section
 st.markdown("<div class='section-header'><h2>About Me</h2></div>", unsafe_allow_html=True)
@@ -529,7 +965,7 @@ st.markdown("<div class='section-header'><h2>About Me</h2></div>", unsafe_allow_
 col1, col2 = st.columns([1, 2])
 
 with col1:
-    # Load about image
+    # Load about image with hover effect
     about_image_path = get_image_path("about_me.jpeg")
     if os.path.exists(about_image_path):
         about_img = load_image(about_image_path)
@@ -552,12 +988,12 @@ Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP 
 </div>
     """, unsafe_allow_html=True)
     
-    # Add key points separately
+    # Add key points separately with staggered animation
     st.markdown("""
     <div class="key-points">
-        <div class="key-point"><i class="fas fa-map-marker-alt"></i> Anantapur,  Andhra Pradesh</div>
-        <div class="key-point"><i class="fas fa-phone"></i> 8106442744</div>
-        <div class="key-point"><i class="fas fa-envelope"></i> mahendraragimanu2@gmail.com</div>
+        <div class="key-point stagger-item" style="animation-delay: 0.1s"><i class="fas fa-map-marker-alt"></i> Anantapur,  Andhra Pradesh</div>
+        <div class="key-point stagger-item" style="animation-delay: 0.2s"><i class="fas fa-phone"></i> 8106442744</div>
+        <div class="key-point stagger-item" style="animation-delay: 0.3s"><i class="fas fa-envelope"></i> mahendraragimanu2@gmail.com</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -568,7 +1004,7 @@ st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="section" id="skills">', unsafe_allow_html=True)
 st.markdown("<div class='section-header'><h2>Technical Skills</h2></div>", unsafe_allow_html=True)
 
-# NEW: Organized skills by category
+# Organized skills by category
 skill_categories = {
     "Programming & Scripts": {
         "icon": "fas fa-code",
@@ -603,7 +1039,7 @@ skill_categories = {
     }
 }
 
-# Display skills by category - only skill names, no bars
+# Display skills by category with enhanced animations
 for category, data in skill_categories.items():
     st.markdown(f"""
     <div class="skill-category">
@@ -617,22 +1053,22 @@ for category, data in skill_categories.items():
     half = len(skills_list) // 2 + len(skills_list) % 2
     
     with col1:
-        for skill in skills_list[:half]:
+        for i, skill in enumerate(skills_list[:half]):
             st.markdown(f"""
-            <div class="skill-container fade-in">
+            <div class="skill-container fade-in" style="animation-delay: {i * 0.2}s">
                 <div class="skill-name">{skill}</div>
             </div>
             """, unsafe_allow_html=True)
     
     with col2:
-        for skill in skills_list[half:]:
+        for i, skill in enumerate(skills_list[half:]):
             st.markdown(f"""
-            <div class="skill-container fade-in">
+            <div class="skill-container fade-in" style="animation-delay: {(i + half) * 0.2}s">
                 <div class="skill-name">{skill}</div>
             </div>
             """, unsafe_allow_html=True)
 
-# Soft Skills
+# Soft Skills with enhanced cards
 st.markdown("<div class='section-header'><h2>Soft Skills</h2></div>", unsafe_allow_html=True)
 
 soft_skills = ["Communication", "Team Work", "Leadership", "Problem Solving", "Analytical Thinking"]
@@ -643,13 +1079,13 @@ cols = [col1, col2, col3]
 for i, skill in enumerate(soft_skills):
     with cols[i % 3]:
         st.markdown(f"""
-        <div class="soft-skill-card fade-in">
+        <div class="soft-skill-card fade-in" style="animation-delay: {i * 0.2}s">
             <i class="fas fa-check-circle"></i>
             <h4>{skill}</h4>
         </div>
         """, unsafe_allow_html=True)
 
-# Work Experience
+# Work Experience with enhanced timeline
 st.markdown("<div class='section-header'><h2>Work Experience</h2></div>", unsafe_allow_html=True)
 
 # Load work experience image for CDAC
@@ -660,7 +1096,7 @@ else:
     exp_img = get_placeholder_image(800, 300, color="#3b2ff5")
 st.image(exp_img, caption="Work Experience at CDAC", use_container_width=True)
 
-# Experience 1
+# Experience 1 with enhanced animation
 st.markdown("""
 <div class="timeline fade-in">
     <div class="timeline-item">
@@ -674,14 +1110,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# List items for Experience 1
+# List items for Experience 1 with staggered animation
 st.markdown("""
 <ul style="margin-top: -20px; margin-left: 40px;">
-    <li>Analyzed and visualized complex datasets using Python, Pandas, and Matplotlib to uncover actionable business insights.</li>
-    <li>Extracted structured information from unstructured text using LLMs (GPT-4) and applied NLP techniques for deeper analysis.</li>
-    <li>Designed and managed SQLite3 databases to efficiently store, query, and retrieve knowledge graph data.</li>
-    <li>Built interactive data visualizations and semantic graphs using NetworkX and Pyvis for intuitive insight communication.</li>
-    <li>Automated data collection and enrichment using web scraping (BeautifulSoup), enhancing analysis depth 
+    <li class="stagger-item" style="animation-delay: 0.1s">Analyzed and visualized complex datasets using Python, Pandas, and Matplotlib to uncover actionable business insights.</li>
+    <li class="stagger-item" style="animation-delay: 0.2s">Extracted structured information from unstructured text using LLMs (GPT-4) and applied NLP techniques for deeper analysis.</li>
+    <li class="stagger-item" style="animation-delay: 0.3s">Designed and managed SQLite3 databases to efficiently store, query, and retrieve knowledge graph data.</li>
+    <li class="stagger-item" style="animation-delay: 0.4s">Built interactive data visualizations and semantic graphs using NetworkX and Pyvis for intuitive insight communication.</li>
+    <li class="stagger-item" style="animation-delay: 0.5s">Automated data collection and enrichment using web scraping (BeautifulSoup), enhancing analysis depth 
 and accuracy.</li>
 </ul>
 """, unsafe_allow_html=True)
@@ -706,17 +1142,17 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# List items for Experience 2
+# List items for Experience 2 with staggered animation
 st.markdown("""
 <ul style="margin-top: -20px; margin-left: 40px;">
-    <li>Worked as a device testing engineer role in intern position.</li>
-    <li>Testing and checking the mobile device performance.</li>
-    <li>Finding the bugs in the device and reporting them to the team leader.</li>
-    <li>Communicating with team members and Developers, Giving and sharing the ideas for solving the bug issues and improving the device performance.</li>
+    <li class="stagger-item" style="animation-delay: 0.1s">Worked as a device testing engineer role in intern position.</li>
+    <li class="stagger-item" style="animation-delay: 0.2s">Testing and checking the mobile device performance.</li>
+    <li class="stagger-item" style="animation-delay: 0.3s">Finding the bugs in the device and reporting them to the team leader.</li>
+    <li class="stagger-item" style="animation-delay: 0.4s">Communicating with team members and Developers, Giving and sharing the ideas for solving the bug issues and improving the device performance.</li>
 </ul>
 """, unsafe_allow_html=True)
 
-# Professional Accomplishments
+# Professional Accomplishments with enhanced cards
 st.markdown("<div class='section-header'><h2>Professional Accomplishments</h2></div>", unsafe_allow_html=True)
 
 accomplishments = [
@@ -730,7 +1166,7 @@ col1, col2 = st.columns(2)
 for i, acc in enumerate(accomplishments):
     with col1 if i % 2 == 0 else col2:
         st.markdown(f"""
-        <div class="accomplishment-card fade-in">
+        <div class="accomplishment-card fade-in" style="animation-delay: {i * 0.2}s">
             <div class="accomplishment-icon"><i class="{acc['icon']}"></i></div>
             <div class="accomplishment-content">
                 <h4>{acc['title']}</h4>
@@ -759,7 +1195,7 @@ project_images = {
 col1, col2 = st.columns([1, 2])
 
 with col1:
-    # Project image placeholder
+    # Project image placeholder with floating animation
     project_img_path = get_image_path("main_project.jpg")
     if os.path.exists(project_img_path):
         project_img = load_image(project_img_path)
@@ -775,7 +1211,7 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-# Individual Projects with GitHub links
+# Individual Projects with GitHub links and enhanced animations
 projects = [
     {
         "title": "AI-Powered Knowledge Graph Explorer",
@@ -885,7 +1321,7 @@ projects = [
     }
 ]
 
-# Display projects in a nice format
+# Display projects in a nice format with enhanced animations
 for i, project in enumerate(projects):
     # Create columns for each project
     if i % 2 == 0:
@@ -902,7 +1338,7 @@ for i, project in enumerate(projects):
         st.image(project_img, caption=project["title"], use_container_width=True)
         
         st.markdown(f"""
-        <div class="project-details fade-in">
+        <div class="project-details fade-in" style="animation-delay: {i * 0.1}s">
             <h3>{project["title"]}</h3>
             <div class="project-meta">
                 <div><i class="far fa-calendar-alt"></i> {project["date"]}</div>
@@ -947,7 +1383,7 @@ else:
     edu_img = get_placeholder_image(600, 400, color="#3527f5")
 st.image(edu_img, caption="Education Journey", use_container_width=True)
 
-# Education details with timeline
+# Education details with enhanced timeline
 education = [
     {
         "degree": "Bachelor of Engineering in Computer Science",
@@ -977,7 +1413,7 @@ education = [
 
 for i, edu in enumerate(education):
     st.markdown(f"""
-    <div class="timeline-item fade-in">
+    <div class="timeline-item fade-in" style="animation-delay: {i * 0.2}s">
         <div class="timeline-dot"></div>
         <div class="timeline-date">{edu["duration"]}</div>
         <div class="timeline-content custom-card">
@@ -994,7 +1430,7 @@ for i, edu in enumerate(education):
     </div>
     """, unsafe_allow_html=True)
 
-# Certifications & Trainings
+# Certifications & Trainings with enhanced cards
 st.markdown("<div class='section-header'><h2>Certifications & Trainings</h2></div>", unsafe_allow_html=True)
 
 certifications = [
@@ -1025,13 +1461,13 @@ col1, col2 = st.columns(2)
 for i, cert in enumerate(certifications):
     with col1 if i % 2 == 0 else col2:
         st.markdown(f"""
-        <div class="custom-card fade-in">
+        <div class="custom-card fade-in" style="animation-delay: {i * 0.2}s">
             <h4>{cert["title"]}</h4>
             <p><i class="fas fa-certificate" style="color: #5846f6;"></i> {cert["issuer"]} | {cert["date"]}</p>
         </div>
         """, unsafe_allow_html=True)
 
-# Languages
+# Languages with enhanced cards
 st.markdown("<div class='section-header'><h2>Languages</h2></div>", unsafe_allow_html=True)
 
 languages = [
@@ -1045,7 +1481,7 @@ cols = st.columns(3)
 for i, lang in enumerate(languages):
     with cols[i]:
         st.markdown(f"""
-        <div class="language-card fade-in">
+        <div class="language-card fade-in" style="animation-delay: {i * 0.2}s">
             <div class="language-icon">
                 <i class="{lang['icon']}"></i>
             </div>
@@ -1064,7 +1500,7 @@ st.markdown("<div class='section-header'><h2>Contact Me</h2></div>", unsafe_allo
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    # Contact form with validation
+    # Enhanced contact form with validation
     st.markdown("<h3>Send me a message</h3>", unsafe_allow_html=True)
     
     # Initialize session state variables for form validation
@@ -1102,8 +1538,8 @@ with col1:
         if st.session_state.message_error:
             st.markdown(f'<div class="form-error">{st.session_state.message_error}</div>', unsafe_allow_html=True)
         
-        # Submit button
-        submitted = st.form_submit_button("Send Message")
+        # Enhanced submit button
+        submitted = st.form_submit_button("🚀 Send Message")
         
         # Form validation
         if submitted:
@@ -1149,36 +1585,111 @@ with col1:
 with col2:
     st.markdown("### 📱 Contact Information")
    
-    # Location
-    st.markdown("#### 📍 Location")
-    st.write("Anantapur, Andhra Pradesh, India")
+    # Enhanced contact items
+    st.markdown("""
+    <div class="contact-item fade-in">
+        <i class="fas fa-map-marker-alt"></i>
+        <div>
+            <h4>📍 Location</h4>
+            <p>Anantapur, Andhra Pradesh, India</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="contact-item fade-in" style="animation-delay: 0.1s">
+        <i class="fas fa-envelope"></i>
+        <div>
+            <h4>✉️ Email</h4>
+            <p>mahendraragimanu2@gmail.com</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="contact-item fade-in" style="animation-delay: 0.2s">
+        <i class="fas fa-phone"></i>
+        <div>
+            <h4>☎️ Phone</h4>
+            <p>+91 8106442744</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
    
-    # Email
-    st.markdown("#### ✉️ Email")
-    st.write("mahendraragimanu2@gmail.com")
-   
-    # Phone
-    st.markdown("#### ☎️ Phone")
-    st.write("+91 8106442744")
-   
-    # Social links using columns instead of HTML
-    st.markdown("#### 🔗 Connect With Me")
+    # Enhanced social links
+    st.markdown("### 🔗 Connect With Me")
     social_cols = st.columns(3)
    
     with social_cols[0]:
-        st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/)")
+        st.markdown("""
+        <div class="social-links">
+            <a href="https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/" target="_blank">
+                <i class="fab fa-linkedin fa-2x"></i>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
    
     with social_cols[1]:
-        st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sivamahendranath)")
+        st.markdown("""
+        <div class="social-links">
+            <a href="https://github.com/Sivamahendranath" target="_blank">
+                <i class="fab fa-github fa-2x"></i>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
    
     with social_cols[2]:
-        st.markdown("[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mahendraragimanu2@gmail.com)")
+        st.markdown("""
+        <div class="social-links">
+            <a href="mailto:mahendraragimanu2@gmail.com" target="_blank">
+                <i class="fas fa-envelope fa-2x"></i>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
-# Footer
+
+# Enhanced Footer
 st.markdown("""
-<div class="footer">
-    <p>&copy;* 2025 Sivamahendranath Ragimanu | @copy Right 2025</p>
+<div class="footer fade-in">
+    <p>© 2025 Sivamahendranath Ragimanu | Crafted with ❤️ using Streamlit</p>
 </div>
 """, unsafe_allow_html=True)
 
+# NEW: Add interactive elements
+# Add a fun interactive element - Skill Level Visualization
+with st.sidebar.expander("🎯 Skill Visualization"):
+    skills_data = {
+        'Python': 90,
+        'Machine Learning': 85,
+        'Data Analysis': 88,
+        'Streamlit': 82,
+        'SQL': 80,
+        'NLP': 75
+    }
+    
+    for skill, level in skills_data.items():
+        st.markdown(f"""
+        <div style="margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between;">
+                <span>{skill}</span>
+                <span>{level}%</span>
+            </div>
+            <div style="background: #e0e0e0; border-radius: 10px; height: 8px;">
+                <div style="background: linear-gradient(90deg, #5846f6, #e73c7e); width: {level}%; height: 8px; border-radius: 10px;"></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# NEW: Add a theme toggle for light/dark mode
+with st.sidebar.expander("🌙 Theme Settings"):
+    dark_mode = st.checkbox("Dark Mode", value=False)
+    if dark_mode:
+        st.markdown("""
+        <style>
+        .stApp {
+            background: #0a192f;
+            color: #e6f1ff;
+        }
+        </style>
+        """, unsafe_allow_html=True)
