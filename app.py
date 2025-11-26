@@ -51,7 +51,7 @@ if 'preloader_done' not in st.session_state:
     st.session_state.preloader_done = False
 
 def load_custom_css():
-    """Enhanced CSS inspired by RootKid design with advanced features"""
+    """Enhanced CSS with advanced animated background"""
     custom_css = """
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -81,7 +81,262 @@ def load_custom_css():
             overflow-x: hidden;
         }
         
-        /* ============ PRELOADER (INSPIRED BY ROOTKID) ============ */
+        /* ============ ANIMATED PARTICLE BACKGROUND ============ */
+        .particle-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        /* ============ STREAMLIT APP CONTAINER ============ */
+        [data-testid="stAppViewContainer"] {
+            background: transparent;
+            position: relative;
+        }
+        
+        [data-testid="stApp"] {
+            background: transparent;
+        }
+        
+        [data-testid="stHeader"] {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+        }
+        
+        [data-testid="stMainBlockContainer"] {
+            padding-top: 1rem;
+            padding-bottom: 3rem;
+            max-width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        section[data-testid="stMain"] {
+            background: transparent;
+            padding: 0rem 1rem;
+        }
+        
+        /* ============ ANIMATED GRID OVERLAY ============ */
+        [data-testid="stAppViewContainer"]::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        /* ============ FLOATING GRADIENT ORBS ============ */
+        [data-testid="stAppViewContainer"]::after {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(120, 119, 198, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 110, 0.1) 0%, transparent 35%),
+                radial-gradient(circle at 10% 80%, rgba(0, 204, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 20%, rgba(255, 195, 0, 0.08) 0%, transparent 40%);
+            animation: orbFloat 25s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes orbFloat {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 0.6;
+            }
+            25% { 
+                transform: translate(100px, -100px) rotate(90deg) scale(1.2);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: translate(-50px, 50px) rotate(180deg) scale(0.9);
+                opacity: 0.7;
+            }
+            75% { 
+                transform: translate(80px, 80px) rotate(270deg) scale(1.1);
+                opacity: 0.85;
+            }
+        }
+        
+        /* ============ WAVE ANIMATION LAYER ============ */
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.3;
+        }
+        
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(0, 255, 65, 0.1));
+            border-radius: 100% 100% 0 0;
+            animation: wave 15s linear infinite;
+        }
+        
+        .wave:nth-child(2) {
+            background: linear-gradient(180deg, transparent, rgba(120, 119, 198, 0.08));
+            animation: wave 20s linear infinite reverse;
+            opacity: 0.7;
+        }
+        
+        .wave:nth-child(3) {
+            background: linear-gradient(180deg, transparent, rgba(255, 0, 110, 0.06));
+            animation: wave 25s linear infinite;
+            opacity: 0.5;
+        }
+        
+        @keyframes wave {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(-25%) translateY(-20px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+        
+        /* ============ FLOATING GEOMETRIC SHAPES ============ */
+        .geometric-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.05;
+            animation: floatShape 20s ease-in-out infinite;
+        }
+        
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation-duration: 25s;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--secondary-color);
+            transform: rotate(45deg);
+            animation-duration: 30s;
+            animation-delay: 2s;
+        }
+        
+        .shape:nth-child(3) {
+            top: 30%;
+            left: 70%;
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--accent-color);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation-duration: 22s;
+            animation-delay: 4s;
+        }
+        
+        .shape:nth-child(4) {
+            top: 80%;
+            left: 20%;
+            width: 90px;
+            height: 90px;
+            border: 2px solid #00ccff;
+            border-radius: 20%;
+            animation-duration: 28s;
+            animation-delay: 1s;
+        }
+        
+        .shape:nth-child(5) {
+            top: 50%;
+            left: 50%;
+            width: 70px;
+            height: 70px;
+            border: 2px solid #ffc300;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation-duration: 26s;
+            animation-delay: 3s;
+        }
+        
+        @keyframes floatShape {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0.05;
+            }
+            25% {
+                transform: translate(50px, -50px) rotate(90deg);
+                opacity: 0.08;
+            }
+            50% {
+                transform: translate(-30px, 30px) rotate(180deg);
+                opacity: 0.06;
+            }
+            75% {
+                transform: translate(40px, 40px) rotate(270deg);
+                opacity: 0.09;
+            }
+        }
+        
+        /* ============ SCANLINE EFFECT ============ */
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            box-shadow: 0 0 20px var(--glow-primary);
+            animation: scanlineMove 4s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        @keyframes scanlineMove {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        /* ============ PRELOADER ============ */
         .preloader {
             position: fixed;
             top: 0;
@@ -159,93 +414,6 @@ def load_custom_css():
             to { width: 100%; }
         }
         
-        /* ============ MATRIX RAIN BACKGROUND ============ */
-        .matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.05;
-            background: radial-gradient(ellipse at center, transparent 0%, var(--bg-dark) 100%);
-        }
-        
-        /* ============ STREAMLIT APP CONTAINER ============ */
-        [data-testid="stAppViewContainer"] {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            background-attachment: fixed;
-        }
-        
-        [data-testid="stApp"] {
-            background: transparent;
-        }
-        
-        [data-testid="stHeader"] {
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
-        }
-        
-        [data-testid="stMainBlockContainer"] {
-            padding-top: 1rem;
-            padding-bottom: 3rem;
-            max-width: 100%;
-            position: relative;
-            z-index: 1;
-        }
-        
-        section[data-testid="stMain"] {
-            background: transparent;
-            padding: 0rem 1rem;
-        }
-        
-        /* ============ ANIMATED GRID BACKGROUND ============ */
-        [data-testid="stAppViewContainer"]::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-        
-        /* ============ FLOATING ORBS ============ */
-        [data-testid="stAppViewContainer"]::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(255, 0, 110, 0.06) 0%, transparent 50%);
-            animation: orbFloat 15s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(50px, -50px) scale(1.1); }
-            66% { transform: translate(-30px, 30px) scale(0.9); }
-        }
-        
         /* ============ CYBERPUNK TABS ============ */
         [data-testid="stTabs"] {
             position: relative;
@@ -290,7 +458,6 @@ def load_custom_css():
             overflow: hidden;
         }
         
-        /* Tab hover with neon effect */
         [data-testid="stTabs"] [data-baseweb="tab"]:hover {
             background: rgba(0, 255, 65, 0.1);
             transform: translateY(-3px);
@@ -301,7 +468,6 @@ def load_custom_css():
             color: var(--primary-color) !important;
         }
         
-        /* Active tab with glowing border */
         [data-testid="stTabs"] [aria-selected="true"] {
             background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(120, 119, 198, 0.1)) !important;
             border: 1px solid var(--primary-color) !important;
@@ -312,7 +478,6 @@ def load_custom_css():
             text-shadow: 0 0 10px var(--glow-primary);
         }
         
-        /* Scan line effect on active tab */
         [data-testid="stTabs"] [aria-selected="true"]::after {
             content: '';
             position: absolute;
@@ -359,7 +524,6 @@ def load_custom_css():
             }
         }
         
-        /* Card hover with neon glow */
         .card-container:hover {
             background: rgba(10, 10, 10, 0.8) !important;
             transform: translateY(-10px);
@@ -370,7 +534,6 @@ def load_custom_css():
             border: 1px solid rgba(0, 255, 65, 0.4);
         }
         
-        /* Corner accent lines */
         .card-container::before {
             content: '';
             position: absolute;
@@ -452,61 +615,7 @@ def load_custom_css():
             50% { border-color: var(--primary-color); }
         }
         
-        /* ============ NEON SKILL BADGES ============ */
-        .skill-badge {
-            display: inline-block;
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin: 6px 8px;
-            font-family: 'Fira Code', monospace;
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: var(--primary-color) !important;
-            box-shadow: 
-                0 0 10px rgba(0, 255, 65, 0.2),
-                inset 0 0 10px rgba(0, 255, 65, 0.05);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .skill-badge:hover {
-            background: rgba(0, 255, 65, 0.15);
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 
-                0 0 30px var(--glow-primary),
-                inset 0 0 20px rgba(0, 255, 65, 0.1);
-            border: 1px solid var(--primary-color);
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
-        
-        /* Badge glow effect */
-        .skill-badge::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(0, 255, 65, 0.3) 50%,
-                transparent 70%
-            );
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-        
-        .skill-badge:hover::before {
-            opacity: 1;
-            left: 100%;
-        }
-        
-        /* ============ GLITCH EFFECT FOR HEADERS ============ */
+        /* ============ GLITCH EFFECT ============ */
         .glitch {
             position: relative;
             font-family: 'Space Grotesk', sans-serif;
@@ -568,47 +677,57 @@ def load_custom_css():
             100% { clip: rect(50px, 9999px, 100px, 0); }
         }
         
-        /* ============ PROGRESS BARS WITH SCAN EFFECT ============ */
-        .progress-bar-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            height: 12px;
-            overflow: hidden;
-            margin: 12px 0;
-            border: 1px solid rgba(0, 255, 65, 0.2);
+        /* ============ NEON SKILL BADGES ============ */
+        .skill-badge {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 6px 8px;
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--primary-color) !important;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 65, 0.2),
+                inset 0 0 10px rgba(0, 255, 65, 0.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            animation: progressFill 2s cubic-bezier(0.65, 0, 0.35, 1);
-            box-shadow: 0 0 20px var(--glow-primary);
-            position: relative;
             overflow: hidden;
         }
         
-        @keyframes progressFill {
-            from { width: 0; }
-            to { width: 85%; }
+        .skill-badge:hover {
+            background: rgba(0, 255, 65, 0.15);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 0 30px var(--glow-primary),
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--primary-color);
+            text-shadow: 0 0 10px var(--glow-primary);
         }
         
-        /* Progress scan line */
-        .progress-bar-fill::after {
+        .skill-badge::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            animation: progressScan 2s infinite;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(0, 255, 65, 0.3) 50%,
+                transparent 70%
+            );
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
         }
         
-        @keyframes progressScan {
-            0% { left: -100%; }
-            100% { left: 100%; }
+        .skill-badge:hover::before {
+            opacity: 1;
+            left: 100%;
         }
         
         /* ============ 3D IMAGE CONTAINERS ============ */
@@ -644,25 +763,6 @@ def load_custom_css():
             filter: brightness(1);
         }
         
-        /* Image scan effect */
-        .image-container::before {
-            content: '';
-            position: absolute;
-            top: -100%;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, transparent, rgba(0, 255, 65, 0.3), transparent);
-            animation: imageScan 3s ease-in-out infinite;
-            z-index: 1;
-        }
-        
-        @keyframes imageScan {
-            0% { top: -100%; }
-            50% { top: 100%; }
-            100% { top: 100%; }
-        }
-        
         /* ============ NEON DIVIDERS ============ */
         .animated-divider {
             height: 2px;
@@ -685,7 +785,6 @@ def load_custom_css():
             }
         }
         
-        /* Moving dot on divider */
         .animated-divider::after {
             content: '';
             position: absolute;
@@ -733,7 +832,7 @@ def load_custom_css():
             50% { transform: translateY(-15px); }
         }
         
-        /* ============ BUTTONS WITH CYBERPUNK STYLE ============ */
+        /* ============ BUTTONS ============ */
         .stButton > button {
             background: linear-gradient(135deg, rgba(0, 255, 65, 0.2), rgba(120, 119, 198, 0.2));
             color: var(--primary-color) !important;
@@ -763,7 +862,6 @@ def load_custom_css():
             text-shadow: 0 0 10px var(--glow-primary);
         }
         
-        /* Button scan effect */
         .stButton > button::before {
             content: '';
             position: absolute;
@@ -813,36 +911,6 @@ def load_custom_css():
             font-weight: 700 !important;
         }
         
-        /* ============ SCROLL TO TOP BUTTON ============ */
-        .scroll-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 255, 65, 0.2);
-            border: 1px solid var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px var(--glow-primary);
-            animation: bounceUpDown 2s ease-in-out infinite;
-        }
-        
-        @keyframes bounceUpDown {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .scroll-top:hover {
-            transform: translateY(-5px) scale(1.1);
-            box-shadow: 0 0 40px var(--glow-primary);
-        }
-        
         /* ============ CUSTOM SCROLLBAR ============ */
         ::-webkit-scrollbar {
             width: 10px;
@@ -869,24 +937,14 @@ def load_custom_css():
                 font-size: 2.5rem;
             }
             
-            .preloader-text {
-                font-size: 1rem;
-            }
-            
             .card-container {
                 padding: 20px 15px;
                 margin: 15px 0;
             }
             
-            [data-testid="stTabs"] [data-baseweb="tab-list"] {
-                gap: 0.5rem;
-                padding: 6px;
-            }
-            
             [data-testid="stTabs"] [data-baseweb="tab"] {
                 padding: 10px 12px;
                 font-size: 0.85rem;
-                height: 38px;
             }
             
             .glow-text {
@@ -896,18 +954,14 @@ def load_custom_css():
             .skill-badge {
                 padding: 8px 14px;
                 font-size: 0.85rem;
-                margin: 4px 6px;
             }
             
-            .scroll-top {
-                bottom: 20px;
-                right: 20px;
-                width: 45px;
-                height: 45px;
+            .shape {
+                display: none;
             }
         }
         
-        /* ============ REDUCED MOTION ============ */
+        /* ============ PERFORMANCE ============ */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -918,7 +972,6 @@ def load_custom_css():
             }
         }
         
-        /* ============ LINK STYLES ============ */
         a {
             color: var(--primary-color) !important;
             text-decoration: none;
@@ -932,6 +985,30 @@ def load_custom_css():
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
+
+def show_animated_background():
+    """Display animated background layers"""
+    background_html = """
+    <!-- Wave Container -->
+    <div class="wave-container">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    
+    <!-- Geometric Shapes -->
+    <div class="geometric-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <!-- Scanline Effect -->
+    <div class="scanline"></div>
+    """
+    st.markdown(background_html, unsafe_allow_html=True)
 
 def show_preloader():
     """Display preloader animation"""
@@ -983,7 +1060,7 @@ def get_placeholder_image(width, height, color="#00ff41"):
     return img
 
 def rate_limit_check():
-    """Rate limiting for form submissions"""
+    """Rate limiting"""
     current_time = time.time()
     st.session_state.form_submissions = [
         t for t in st.session_state.form_submissions 
@@ -1052,18 +1129,18 @@ def send_email_notification(name, email, message):
         <html>
         <body style="font-family: 'Courier New', monospace; background: #0a0a0a; padding: 40px;">
             <div style="max-width: 600px; margin: 0 auto; background: rgba(0,255,65,0.05); padding: 40px; border-radius: 15px; border: 1px solid #00ff41;">
-                <h2 style="color: #00ff41; font-family: monospace;">⚡ NEW CONTACT FORM SUBMISSION</h2>
+                <h2 style="color: #00ff41;">⚡ NEW CONTACT FORM SUBMISSION</h2>
                 <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #00ff41;">
                     <p style="color: #fff;"><strong style="color: #00ff41;">NAME:</strong> {name}</p>
                     <p style="color: #fff;"><strong style="color: #00ff41;">EMAIL:</strong> {email}</p>
                 </div>
                 <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #7877c6;">
                     <p style="color: #fff;"><strong style="color: #00ff41;">MESSAGE:</strong></p>
-                    <p style="color: #ddd; line-height: 1.8;">{message}</p>
+                    <p style="color: #ddd;">{message}</p>
                 </div>
-                <hr style="border: 1px solid rgba(0,255,65,0.2); margin: 30px 0;">
+                <hr style="border: 1px solid rgba(0,255,65,0.2);">
                 <p style="color: #999; font-size: 12px; text-align: center;">
-                    🤖 AUTOMATED NOTIFICATION • {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                    🤖 {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
                 </p>
             </div>
         </body>
@@ -1089,11 +1166,11 @@ def is_valid_email(email):
     return bool(re.match(email_pattern, email))
 
 def sanitize_input(text):
-    """Sanitize user input"""
+    """Sanitize input"""
     return text.strip()[:500]
 
 # Portfolio data
-ABOUT = """I'm an aspiring AI & Data Science Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4, LLaMA), and RAG pipelines. I interned at C-DAC Hyderabad, where I architected AI-powered knowledge graphs, semantic search engines, and document analysis systems using cutting-edge technologies like Streamlit, NetworkX, LangChain, and FAISS.
+ABOUT = """I'm an aspiring AI & Data Science Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4, LLaMA), and RAG pipelines. I interned at C-DAC Hyderabad, where I architected AI-powered knowledge graphs, semantic search engines, and document analysis systems using cutting-edge technologies.
 
 I believe in practical learning and hands-on experience. If it's smart, it's vulnerable to innovation! 🚀"""
 
@@ -1185,31 +1262,19 @@ CERTIFICATIONS = [
 ]
 
 def animated_background_plot(tab_key):
-    """Create animated background visualizations"""
+    """Create animated visualizations"""
     n = 500
     x = np.linspace(0, 10, n)
     noise = np.random.rand() * 2
     y = np.sin(x + noise) * np.cos(x * 0.5) * random.uniform(1.2, 2.5)
     
-    color_schemes = {
-        "about": ["#00ff41", "#7877c6"],
-        "exp": ["#00ff41", "#ff006e"],
-        "proj": ["#7877c6", "#00ff41"],
-        "skills": ["#ff006e", "#7877c6"],
-        "edu": ["#00ff41", "#00ccff"],
-        "contact": ["#ff006e", "#00ff41"]
-    }
-    
-    colors = color_schemes.get(tab_key, ["#00ff41", "#7877c6"])
+    colors = ["#00ff41", "#7877c6"]
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=x, y=y,
         mode='lines',
-        line=dict(
-            color=colors[0],
-            width=3
-        ),
+        line=dict(color=colors[0], width=3),
         fill='tonexty',
         fillcolor=f'rgba(0, 255, 65, 0.05)',
         opacity=0.3
@@ -1228,15 +1293,18 @@ def animated_background_plot(tab_key):
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 def main():
-    """Main application function"""
+    """Main application"""
     load_custom_css()
     
-    # Show preloader on first load
+    # Show animated background
+    show_animated_background()
+    
+    # Show preloader
     if not st.session_state.preloader_done:
         show_preloader()
         st.session_state.preloader_done = True
     
-    # Hero section with glitch effect
+    # Hero section
     st.markdown("""
     <div class="fade-in" style="text-align:center; padding:4rem 1.5rem 2rem;">
         <h1 class="glow-text glitch" data-text="SIVAMAHENDRANATH RAGIMANU" style="font-size:3.5rem; margin-bottom:0.5rem;">
@@ -1273,9 +1341,9 @@ def main():
             st.image(profile_img, width=340)
             st.markdown("""
             <div style="text-align:center; margin-top:1.5rem;">
-                <span class="skill-badge" style="margin:5px;">🐍 Python Expert</span>
-                <span class="skill-badge" style="margin:5px;">🤖 AI Engineer</span>
-                <span class="skill-badge" style="margin:5px;">📊 Data Scientist</span>
+                <span class="skill-badge">🐍 Python Expert</span>
+                <span class="skill-badge">🤖 AI Engineer</span>
+                <span class="skill-badge">📊 Data Scientist</span>
             </div>
             """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -1405,9 +1473,7 @@ def main():
             **📍 Location:** Anantapur, Andhra Pradesh, India  
             **📧 Email:** [mahendraragimanu2@gmail.com](mailto:mahendraragimanu2@gmail.com)  
             **📱 Phone:** +91 8106442744  
-            **🌐 Portfolio:** [https://example.com](https://example.com)  
-            **💼 LinkedIn:** [Connect with me](https://linkedin.com)  
-            **💻 GitHub:** [Check my repos](https://github.com)
+            **🌐 Portfolio:** [https://example.com](https://example.com)
             """)
             
             st.markdown("#### 🌟 Quick Stats")
@@ -1433,18 +1499,18 @@ def main():
             with st.form("contact_form", clear_on_submit=True):
                 name = st.text_input("🔖 Your Name", placeholder="John Doe")
                 email = st.text_input("📧 Your Email", placeholder="john@example.com")
-                message = st.text_area("💬 Message", placeholder="Tell me about your project or just say hi!", height=130)
+                message = st.text_area("💬 Message", placeholder="Tell me about your project!", height=130)
                 submit_button = st.form_submit_button("🚀 SEND MESSAGE", use_container_width=True)
                 
                 if submit_button:
                     if not rate_limit_check():
-                        st.error("⚠️ Too many submissions. Please try again later.")
+                        st.error("⚠️ Too many submissions.")
                     elif not name or not email or not message:
-                        st.error("❌ Please fill in all fields")
+                        st.error("❌ Please fill all fields")
                     elif not is_valid_email(email):
-                        st.error("❌ Invalid email address")
+                        st.error("❌ Invalid email")
                     elif len(message) < 10:
-                        st.error("❌ Message too short (min 10 characters)")
+                        st.error("❌ Message too short")
                     else:
                         name = sanitize_input(name)
                         email = sanitize_input(email)
@@ -1453,31 +1519,26 @@ def main():
                         if save_message_to_db(name, email, message):
                             st.session_state.form_submissions.append(time.time())
                             send_email_notification(name, email, message)
-                            st.success("✅ Message sent successfully! I'll respond ASAP.", icon="🎉")
+                            st.success("✅ Message sent successfully!", icon="🎉")
                         else:
-                            st.error("❌ Failed to send. Please try again.")
+                            st.error("❌ Failed to send.")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
     st.markdown("""
     <div class="animated-divider" style="margin-top:5rem;"></div>
-    <div style="text-align:center; padding:3rem 1.5rem 2rem; opacity:0.9;">
-        <p style="font-size:1.1rem; margin-bottom:0.8rem; font-family:'Space Grotesk', sans-serif; font-weight:600;">
+    <div style="text-align:center; padding:3rem 1.5rem 2rem;">
+        <p style="font-size:1.1rem; font-family:'Space Grotesk', sans-serif; font-weight:600;">
             © 2025 Sivamahendranath Ragimanu
         </p>
-        <p style="font-size:0.95rem; opacity:0.7; margin-top:0.8rem; font-family:'Fira Code', monospace;">
-            Built with 💚 using Streamlit | Inspired by Modern Cyberpunk Design
+        <p style="font-size:0.95rem; opacity:0.7; font-family:'Fira Code', monospace;">
+            Built with 💚 using Streamlit | Cyberpunk Design
         </p>
         <div class="fade-in" style="margin-top:2rem;">
-            <span class="glow-text" style="font-size:1.3rem; font-family:'Fira Code', monospace;">
+            <span class="glow-text" style="font-size:1.3rem;">
                 > Let's build the future with AI! 🚀
             </span>
-        </div>
-        <div style="margin-top:2rem;">
-            <span class="skill-badge" style="cursor:pointer;">🌟 Star on GitHub</span>
-            <span class="skill-badge" style="cursor:pointer;">💼 Hire Me</span>
-            <span class="skill-badge" style="cursor:pointer;">☕ Buy me a coffee</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
