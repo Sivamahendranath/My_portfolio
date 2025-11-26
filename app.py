@@ -18,7 +18,7 @@ import logging
 from datetime import datetime
 import hashlib
 
-# Configure logging for production
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -29,36 +29,153 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Page config with enhanced settings
+# Page config
 st.set_page_config(
-    page_title="Sivamahendranath Ragimanu | AI Portfolio",
-    page_icon="👨💻",
+    page_title="Sivamahendranath Ragimanu | AI Developer",
+    page_icon="🚀",
     layout="wide",
     initial_sidebar_state="collapsed",
     menu_items={
         'Get Help': 'https://github.com/yourusername',
         'Report a bug': 'mailto:mahendraragimanu2@gmail.com',
-        'About': '# AI-Powered Portfolio\nVersion 2.0'
+        'About': '# AI-Powered Portfolio\nVersion 3.0 - Production Ready'
     }
 )
 
-# Security: Rate limiting storage
+# Initialize session state
 if 'form_submissions' not in st.session_state:
     st.session_state.form_submissions = []
-if 'page_load_time' not in st.session_state:
-    st.session_state.page_load_time = time.time()
+if 'page_loaded' not in st.session_state:
+    st.session_state.page_loaded = False
+if 'preloader_done' not in st.session_state:
+    st.session_state.preloader_done = False
 
 def load_custom_css():
-    """Enhanced CSS with proper Streamlit selectors"""
+    """Enhanced CSS inspired by RootKid design with advanced features"""
     custom_css = """
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
         
-        /* ============ STREAMLIT APP BACKGROUND (FIXED) ============ */
+        /* ============ ROOT & GLOBAL VARIABLES ============ */
+        :root {
+            --primary-color: #00ff41;
+            --secondary-color: #7877c6;
+            --accent-color: #ff006e;
+            --bg-dark: #0a0a0a;
+            --bg-darker: #050505;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --glow-primary: rgba(0, 255, 65, 0.5);
+            --glow-secondary: rgba(120, 119, 198, 0.5);
+        }
+        
+        /* ============ GLOBAL STYLES ============ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+        
+        /* ============ PRELOADER (INSPIRED BY ROOTKID) ============ */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: preloaderFade 0.8s ease 3s forwards;
+        }
+        
+        @keyframes preloaderFade {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .preloader-content {
+            text-align: center;
+            animation: glitchPulse 2s ease-in-out infinite;
+        }
+        
+        .preloader-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            font-family: 'Fira Code', monospace;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: logoGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes logoGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 20px var(--glow-primary));
+            }
+            50% {
+                filter: drop-shadow(0 0 40px var(--glow-secondary)) drop-shadow(0 0 60px var(--glow-primary));
+            }
+        }
+        
+        .preloader-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            letter-spacing: 3px;
+            margin-top: 1rem;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 2rem;
+        }
+        
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            animation: loadingProgress 3s ease-in-out forwards;
+            box-shadow: 0 0 20px var(--glow-primary);
+        }
+        
+        @keyframes loadingProgress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+        
+        /* ============ MATRIX RAIN BACKGROUND ============ */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.05;
+            background: radial-gradient(ellipse at center, transparent 0%, var(--bg-dark) 100%);
+        }
+        
+        /* ============ STREAMLIT APP CONTAINER ============ */
         [data-testid="stAppViewContainer"] {
-            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            background-attachment: fixed;
         }
         
         [data-testid="stApp"] {
@@ -66,20 +183,17 @@ def load_custom_css():
         }
         
         [data-testid="stHeader"] {
-            background: transparent;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
         }
         
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* ============ MAIN CONTENT AREA ============ */
         [data-testid="stMainBlockContainer"] {
-            padding-top: 2rem;
+            padding-top: 1rem;
             padding-bottom: 3rem;
             max-width: 100%;
+            position: relative;
+            z-index: 1;
         }
         
         section[data-testid="stMain"] {
@@ -87,7 +201,7 @@ def load_custom_css():
             padding: 0rem 1rem;
         }
         
-        /* ============ FLOATING PARTICLES EFFECT ============ */
+        /* ============ ANIMATED GRID BACKGROUND ============ */
         [data-testid="stAppViewContainer"]::before {
             content: '';
             position: fixed;
@@ -96,70 +210,57 @@ def load_custom_css():
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(78, 205, 196, 0.1) 0%, transparent 40%);
-            animation: particleFloat 20s ease-in-out infinite;
+                linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
             pointer-events: none;
             z-index: 0;
         }
         
-        @keyframes particleFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
         }
         
-        /* ============ MORPHING BLOB ============ */
+        /* ============ FLOATING ORBS ============ */
         [data-testid="stAppViewContainer"]::after {
             content: '';
             position: fixed;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(157, 78, 221, 0.08) 0%, transparent 70%);
-            animation: blobMorph 25s ease-in-out infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(120, 119, 198, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 0, 110, 0.06) 0%, transparent 50%);
+            animation: orbFloat 15s ease-in-out infinite;
             pointer-events: none;
             z-index: 0;
         }
         
-        @keyframes blobMorph {
-            0%, 100% { 
-                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-                transform: rotate(0deg) scale(1);
-            }
-            50% { 
-                border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-                transform: rotate(180deg) scale(1.1);
-            }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
         }
         
-        /* ============ ENSURE CONTENT IS VISIBLE ============ */
-        [data-testid="stMainBlockContainer"] > div {
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* ============ TEXT COLOR ============ */
-        .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, div {
-            color: #ffffff !important;
-        }
-        
-        /* ============ GLASSMORPHISM TABS ============ */
+        /* ============ CYBERPUNK TABS ============ */
         [data-testid="stTabs"] {
             position: relative;
             z-index: 10;
         }
         
         [data-testid="stTabs"] [data-baseweb="tab-list"] {
-            gap: 1.5rem;
+            gap: 1rem;
             animation: slideInDown 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            background: rgba(10, 10, 10, 0.8);
             backdrop-filter: blur(20px);
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
         }
         
         @keyframes slideInDown {
@@ -174,87 +275,83 @@ def load_custom_css():
         }
         
         [data-testid="stTabs"] [data-baseweb="tab"] {
-            height: 50px;
-            padding: 14px 26px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-size: 1.05rem;
-            letter-spacing: 0.5px;
+            height: 45px;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-size: 1rem;
+            letter-spacing: 1px;
             position: relative;
             overflow: hidden;
         }
         
+        /* Tab hover with neon effect */
         [data-testid="stTabs"] [data-baseweb="tab"]:hover {
-            background: rgba(120, 119, 198, 0.2);
-            transform: translateY(-5px) scale(1.05);
+            background: rgba(0, 255, 65, 0.1);
+            transform: translateY(-3px);
             box-shadow: 
-                0 20px 40px rgba(120, 119, 198, 0.3),
-                0 0 30px rgba(157, 78, 221, 0.2);
-            border: 1.5px solid rgba(120, 119, 198, 0.6);
+                0 10px 30px rgba(0, 255, 65, 0.2),
+                inset 0 0 20px rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.5);
+            color: var(--primary-color) !important;
         }
         
+        /* Active tab with glowing border */
         [data-testid="stTabs"] [aria-selected="true"] {
-            background: linear-gradient(135deg, rgba(120, 119, 198, 0.3), rgba(157, 78, 221, 0.3)) !important;
-            border: 2px solid #7877c6 !important;
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(120, 119, 198, 0.1)) !important;
+            border: 1px solid var(--primary-color) !important;
             box-shadow: 
-                0 0 40px rgba(120, 119, 198, 0.6),
-                inset 0 0 20px rgba(157, 78, 221, 0.3) !important;
-            text-shadow: 0 0 20px rgba(120, 119, 198, 0.8);
-            color: #fff !important;
-            transform: scale(1.08);
+                0 0 30px var(--glow-primary),
+                inset 0 0 20px rgba(0, 255, 65, 0.1) !important;
+            color: var(--primary-color) !important;
+            text-shadow: 0 0 10px var(--glow-primary);
         }
         
-        /* Tab shimmer effect */
-        [data-testid="stTabs"] [data-baseweb="tab"]::before {
+        /* Scan line effect on active tab */
+        [data-testid="stTabs"] [aria-selected="true"]::after {
             content: '';
             position: absolute;
-            top: -50%;
+            top: 0;
             left: -100%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255, 255, 255, 0.2) 50%,
-                transparent 70%
-            );
-            transform: rotate(45deg);
-            animation: shimmerSlide 3s infinite;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.3), transparent);
+            animation: scanLine 2s ease-in-out infinite;
         }
         
-        @keyframes shimmerSlide {
+        @keyframes scanLine {
             0% { left: -100%; }
             100% { left: 100%; }
         }
         
-        /* ============ ENHANCED GLASSMORPHISM CARDS ============ */
+        /* ============ CYBERPUNK GLASS CARDS ============ */
         .card-container {
-            background: rgba(255, 255, 255, 0.08) !important;
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 25px;
-            padding: 35px 25px;
-            margin: 25px 0;
+            background: rgba(10, 10, 10, 0.6) !important;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            padding: 30px 25px;
+            margin: 20px 0;
             box-shadow: 
-                0 25px 60px rgba(0, 0, 0, 0.3),
-                0 0 50px rgba(120, 119, 198, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                0 0 20px rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.2);
             position: relative;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation: cardSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+            overflow: hidden;
         }
         
         @keyframes cardSlideUp {
             from {
                 opacity: 0;
-                transform: translateY(60px) scale(0.95);
+                transform: translateY(50px) scale(0.95);
             }
             to {
                 opacity: 1;
@@ -262,33 +359,49 @@ def load_custom_css():
             }
         }
         
+        /* Card hover with neon glow */
         .card-container:hover {
-            background: rgba(255, 255, 255, 0.12) !important;
-            transform: translateY(-15px) scale(1.02);
+            background: rgba(10, 10, 10, 0.8) !important;
+            transform: translateY(-10px);
             box-shadow: 
-                0 35px 90px rgba(120, 119, 198, 0.3),
-                0 0 60px rgba(157, 78, 221, 0.25),
-                inset 0 2px 0 rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(120, 119, 198, 0.4);
+                0 20px 60px rgba(0, 255, 65, 0.15),
+                inset 0 1px 0 rgba(0, 255, 65, 0.2),
+                0 0 40px rgba(0, 255, 65, 0.1);
+            border: 1px solid rgba(0, 255, 65, 0.4);
         }
         
+        /* Corner accent lines */
         .card-container::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(157, 78, 221, 0.15) 0%, transparent 70%);
-            transform: translate(-50%, -50%);
-            animation: pulseGlow 4s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 30px;
+            border-top: 2px solid var(--primary-color);
+            border-left: 2px solid var(--primary-color);
+            opacity: 0.5;
+            transition: all 0.3s ease;
         }
         
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+        .card-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            border-right: 2px solid var(--primary-color);
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+        
+        .card-container:hover::before,
+        .card-container:hover::after {
+            width: 60px;
+            height: 60px;
+            opacity: 1;
         }
         
         .card-container > * {
@@ -296,62 +409,80 @@ def load_custom_css():
             z-index: 1;
         }
         
-        /* ============ GLOWING TEXT ============ */
+        /* ============ GLOWING HEADER TEXT ============ */
         .glow-text {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #7877c6, #9d4edd, #4ecdc4);
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: textGlowPulse 3s ease-in-out infinite;
+            animation: textPulse 3s ease-in-out infinite;
             font-weight: 900;
             display: inline-block;
+            position: relative;
         }
         
-        @keyframes textGlowPulse {
+        @keyframes textPulse {
             0%, 100% {
-                filter: brightness(1) drop-shadow(0 0 20px rgba(120, 119, 198, 0.6));
+                filter: brightness(1) drop-shadow(0 0 20px var(--glow-primary));
             }
             50% {
-                filter: brightness(1.3) drop-shadow(0 0 40px rgba(157, 78, 221, 0.8));
+                filter: brightness(1.4) drop-shadow(0 0 40px var(--glow-secondary));
             }
         }
         
-        /* ============ SKILL BADGES ============ */
-        .skill-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, rgba(120, 119, 198, 0.2), rgba(157, 78, 221, 0.2));
-            border: 2px solid rgba(120, 119, 198, 0.4);
-            padding: 12px 24px;
-            border-radius: 30px;
-            margin: 8px 10px;
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: #ffffff !important;
-            box-shadow: 
-                0 0 20px rgba(120, 119, 198, 0.3),
-                inset 0 0 10px rgba(255, 255, 255, 0.1);
-            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(10px);
-            position: relative;
+        /* ============ TYPEWRITER EFFECT ============ */
+        .typewriter {
+            font-family: 'Fira Code', monospace;
+            color: var(--primary-color);
+            border-right: 2px solid var(--primary-color);
+            animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
+            white-space: nowrap;
             overflow: hidden;
-            animation: badgeFloat 3s ease-in-out infinite;
+            display: inline-block;
         }
         
-        @keyframes badgeFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        @keyframes blink {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary-color); }
+        }
+        
+        /* ============ NEON SKILL BADGES ============ */
+        .skill-badge {
+            display: inline-block;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin: 6px 8px;
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--primary-color) !important;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 65, 0.2),
+                inset 0 0 10px rgba(0, 255, 65, 0.05);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
         }
         
         .skill-badge:hover {
-            background: linear-gradient(135deg, rgba(120, 119, 198, 0.4), rgba(157, 78, 221, 0.4));
-            transform: scale(1.25) rotate(-3deg);
+            background: rgba(0, 255, 65, 0.15);
+            transform: translateY(-3px) scale(1.05);
             box-shadow: 
-                0 0 50px rgba(120, 119, 198, 0.8),
-                inset 0 0 20px rgba(120, 119, 198, 0.3);
-            border: 2px solid rgba(120, 119, 198, 0.9);
+                0 0 30px var(--glow-primary),
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+            border: 1px solid var(--primary-color);
+            text-shadow: 0 0 10px var(--glow-primary);
         }
         
+        /* Badge glow effect */
         .skill-badge::before {
             content: '';
             position: absolute;
@@ -361,97 +492,215 @@ def load_custom_css():
             height: 200%;
             background: linear-gradient(
                 45deg,
-                transparent,
-                rgba(255, 255, 255, 0.3),
-                transparent
+                transparent 30%,
+                rgba(0, 255, 65, 0.3) 50%,
+                transparent 70%
             );
             transform: rotate(45deg);
-            transition: all 0.5s;
+            transition: all 0.6s;
+            opacity: 0;
         }
         
         .skill-badge:hover::before {
+            opacity: 1;
             left: 100%;
         }
         
-        /* ============ PROGRESS BARS ============ */
+        /* ============ GLITCH EFFECT FOR HEADERS ============ */
+        .glitch {
+            position: relative;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            2%, 64% {
+                transform: translate(2px, 0) skew(0deg);
+            }
+            4%, 60% {
+                transform: translate(-2px, 0) skew(0deg);
+            }
+            62% {
+                transform: translate(0, 0) skew(5deg);
+            }
+        }
+        
+        .glitch:before,
+        .glitch:after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch:before {
+            left: 2px;
+            text-shadow: -2px 0 var(--accent-color);
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch:after {
+            left: -2px;
+            text-shadow: -2px 0 var(--primary-color);
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 31px, 0); }
+            20% { clip: rect(70px, 9999px, 71px, 0); }
+            40% { clip: rect(60px, 9999px, 130px, 0); }
+            60% { clip: rect(90px, 9999px, 110px, 0); }
+            80% { clip: rect(50px, 9999px, 90px, 0); }
+            100% { clip: rect(30px, 9999px, 50px, 0); }
+        }
+        
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 119px, 0); }
+            20% { clip: rect(20px, 9999px, 40px, 0); }
+            40% { clip: rect(80px, 9999px, 120px, 0); }
+            60% { clip: rect(40px, 9999px, 60px, 0); }
+            80% { clip: rect(90px, 9999px, 150px, 0); }
+            100% { clip: rect(50px, 9999px, 100px, 0); }
+        }
+        
+        /* ============ PROGRESS BARS WITH SCAN EFFECT ============ */
         .progress-bar-container {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            height: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            height: 12px;
             overflow: hidden;
-            margin: 15px 0;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 12px 0;
+            border: 1px solid rgba(0, 255, 65, 0.2);
             position: relative;
             box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
         .progress-bar-fill {
-            background: linear-gradient(90deg, #7877c6, #9d4edd, #4ecdc4);
             height: 100%;
-            border-radius: 15px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             animation: progressFill 2s cubic-bezier(0.65, 0, 0.35, 1);
-            box-shadow: 0 0 20px rgba(120, 119, 198, 0.6);
+            box-shadow: 0 0 20px var(--glow-primary);
             position: relative;
             overflow: hidden;
         }
         
         @keyframes progressFill {
-            from { width: 0; opacity: 0; }
-            to { width: 90%; opacity: 1; }
+            from { width: 0; }
+            to { width: 85%; }
+        }
+        
+        /* Progress scan line */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            animation: progressScan 2s infinite;
+        }
+        
+        @keyframes progressScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
         
         /* ============ 3D IMAGE CONTAINERS ============ */
         .image-container {
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
             box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(120, 119, 198, 0.3);
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 255, 65, 0.2);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-width: 100%;
-            height: auto;
             position: relative;
+            border: 1px solid rgba(0, 255, 65, 0.3);
         }
         
         .image-container:hover {
-            transform: translateY(-10px) scale(1.05);
+            transform: translateY(-8px) scale(1.03);
             box-shadow: 
-                0 30px 80px rgba(120, 119, 198, 0.5),
-                0 0 60px rgba(157, 78, 221, 0.4);
+                0 20px 60px rgba(0, 255, 65, 0.3),
+                0 0 40px var(--glow-primary);
+            border: 1px solid var(--primary-color);
         }
         
         .image-container img {
             width: 100%;
             height: auto;
             display: block;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            filter: brightness(0.95);
+            transition: transform 0.5s;
+            filter: brightness(0.9);
         }
         
         .image-container:hover img {
-            transform: scale(1.1);
-            filter: brightness(1.1);
+            transform: scale(1.05);
+            filter: brightness(1);
         }
         
-        /* ============ ANIMATED DIVIDERS ============ */
+        /* Image scan effect */
+        .image-container::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(0, 255, 65, 0.3), transparent);
+            animation: imageScan 3s ease-in-out infinite;
+            z-index: 1;
+        }
+        
+        @keyframes imageScan {
+            0% { top: -100%; }
+            50% { top: 100%; }
+            100% { top: 100%; }
+        }
+        
+        /* ============ NEON DIVIDERS ============ */
         .animated-divider {
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #7877c6, #9d4edd, #4ecdc4, transparent);
-            margin: 2.5rem 0;
-            animation: dividerPulse 3s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(120, 119, 198, 0.5);
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), var(--accent-color), transparent);
+            margin: 2rem 0;
+            animation: dividerGlow 3s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--glow-primary);
             border-radius: 2px;
+            position: relative;
         }
         
-        @keyframes dividerPulse {
+        @keyframes dividerGlow {
             0%, 100% {
-                opacity: 0.5;
-                box-shadow: 0 0 20px rgba(120, 119, 198, 0.3);
+                opacity: 0.6;
+                box-shadow: 0 0 20px var(--glow-primary);
             }
             50% {
                 opacity: 1;
-                box-shadow: 0 0 40px rgba(120, 119, 198, 0.8);
+                box-shadow: 0 0 40px var(--glow-primary);
             }
+        }
+        
+        /* Moving dot on divider */
+        .animated-divider::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--glow-primary);
+            animation: dotMove 3s linear infinite;
+        }
+        
+        @keyframes dotMove {
+            0% { left: 0%; }
+            100% { left: 100%; }
         }
         
         /* ============ FADE ANIMATIONS ============ */
@@ -466,115 +715,178 @@ def load_custom_css():
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(50px) scale(0.9);
+                transform: translateY(40px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        /* ============ HEADER EFFECTS ============ */
-        .header-glow {
-            position: relative;
-            z-index: 50;
-            animation: headerFloat 4s ease-in-out infinite;
-        }
-        
-        @keyframes headerFloat {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
+                transform: translateY(0);
             }
         }
         
         /* ============ FLOAT ANIMATION ============ */
         .float-animation {
-            animation: floatUpDown 6s ease-in-out infinite;
+            animation: floatUpDown 4s ease-in-out infinite;
         }
         
         @keyframes floatUpDown {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
         
-        /* ============ STREAMLIT FORM BUTTONS ============ */
+        /* ============ BUTTONS WITH CYBERPUNK STYLE ============ */
         .stButton > button {
-            background: linear-gradient(135deg, #7877c6, #9d4edd);
-            color: white !important;
-            padding: 15px 35px;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            box-shadow: 0 10px 30px rgba(120, 119, 198, 0.4);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.2), rgba(120, 119, 198, 0.2));
+            color: var(--primary-color) !important;
+            padding: 14px 32px;
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.3),
+                inset 0 0 10px rgba(0, 255, 65, 0.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 100%;
+            position: relative;
+            overflow: hidden;
         }
         
         .stButton > button:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(120, 119, 198, 0.7);
-            background: linear-gradient(135deg, #9d4edd, #4ecdc4);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 40px var(--glow-primary),
+                inset 0 0 20px rgba(0, 255, 65, 0.2);
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.3), rgba(120, 119, 198, 0.3));
+            border: 1px solid var(--primary-color);
+            text-shadow: 0 0 10px var(--glow-primary);
+        }
+        
+        /* Button scan effect */
+        .stButton > button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .stButton > button:hover::before {
+            left: 100%;
         }
         
         /* ============ FORM INPUTS ============ */
         .stTextInput > div > div > input,
         .stTextArea > div > div > textarea {
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 2px solid rgba(255, 255, 255, 0.2) !important;
-            color: white !important;
-            padding: 18px 25px !important;
-            border-radius: 15px !important;
-            backdrop-filter: blur(15px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid rgba(0, 255, 65, 0.3) !important;
+            color: var(--text-primary) !important;
+            padding: 16px 20px !important;
+            border-radius: 10px !important;
+            font-family: 'Fira Code', monospace !important;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
         }
         
         .stTextInput > div > div > input:focus,
         .stTextArea > div > div > textarea:focus {
-            background: rgba(255, 255, 255, 0.15) !important;
-            border: 2px solid #7877c6 !important;
+            background: rgba(0, 0, 0, 0.7) !important;
+            border: 1px solid var(--primary-color) !important;
             box-shadow: 
-                0 0 40px rgba(120, 119, 198, 0.3),
-                inset 0 0 15px rgba(120, 119, 198, 0.1) !important;
+                0 0 30px var(--glow-primary),
+                inset 0 0 15px rgba(0, 255, 65, 0.1) !important;
             transform: translateY(-2px);
         }
         
-        /* ============ SCROLLBAR ============ */
+        /* ============ TEXT COLORS ============ */
+        .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, div, li {
+            color: var(--text-primary) !important;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif !important;
+            font-weight: 700 !important;
+        }
+        
+        /* ============ SCROLL TO TOP BUTTON ============ */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px var(--glow-primary);
+            animation: bounceUpDown 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounceUpDown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .scroll-top:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 0 40px var(--glow-primary);
+        }
+        
+        /* ============ CUSTOM SCROLLBAR ============ */
         ::-webkit-scrollbar {
-            width: 12px;
+            width: 10px;
         }
         
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
         }
         
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #7877c6, #9d4edd);
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
             border-radius: 10px;
+            box-shadow: 0 0 10px var(--glow-primary);
         }
         
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #9d4edd, #4ecdc4);
+            background: linear-gradient(180deg, var(--secondary-color), var(--accent-color));
+            box-shadow: 0 0 20px var(--glow-secondary);
         }
         
         /* ============ RESPONSIVE DESIGN ============ */
         @media (max-width: 768px) {
+            .preloader-logo {
+                font-size: 2.5rem;
+            }
+            
+            .preloader-text {
+                font-size: 1rem;
+            }
+            
             .card-container {
                 padding: 20px 15px;
                 margin: 15px 0;
             }
             
             [data-testid="stTabs"] [data-baseweb="tab-list"] {
-                gap: 0.8rem;
+                gap: 0.5rem;
+                padding: 6px;
             }
             
             [data-testid="stTabs"] [data-baseweb="tab"] {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-                height: 40px;
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                height: 38px;
             }
             
             .glow-text {
@@ -582,14 +894,64 @@ def load_custom_css():
             }
             
             .skill-badge {
-                padding: 8px 16px;
-                font-size: 0.9rem;
-                margin: 5px 7px;
+                padding: 8px 14px;
+                font-size: 0.85rem;
+                margin: 4px 6px;
             }
+            
+            .scroll-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+        }
+        
+        /* ============ REDUCED MOTION ============ */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* ============ LINK STYLES ============ */
+        a {
+            color: var(--primary-color) !important;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        a:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--glow-primary);
         }
     </style>
     """
     st.markdown(custom_css, unsafe_allow_html=True)
+
+def show_preloader():
+    """Display preloader animation"""
+    preloader_html = """
+    <div class="preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">🚀</div>
+            <div class="preloader-text">INITIALIZING AI PORTFOLIO...</div>
+            <div class="loading-bar">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => {
+            document.querySelector('.preloader').style.display = 'none';
+        }, 3000);
+    </script>
+    """
+    st.markdown(preloader_html, unsafe_allow_html=True)
 
 def get_image_path(relative_path):
     """Secure image path resolution"""
@@ -610,29 +972,27 @@ def load_image(image_path):
         if image_path and os.path.exists(image_path):
             return Image.open(image_path)
         else:
-            return get_placeholder_image(400, 400, color="#7877c6")
+            return get_placeholder_image(400, 400, color="#00ff41")
     except Exception as e:
         logger.error(f"Error loading image {image_path}: {e}")
-        return get_placeholder_image(400, 400, color="#7877c6")
+        return get_placeholder_image(400, 400, color="#00ff41")
 
-def get_placeholder_image(width, height, color="#7877c6"):
+def get_placeholder_image(width, height, color="#00ff41"):
     """Generate placeholder image"""
     img = Image.new('RGB', (width, height), color=color)
     return img
 
 def rate_limit_check():
-    """Simple rate limiting for form submissions"""
+    """Rate limiting for form submissions"""
     current_time = time.time()
     st.session_state.form_submissions = [
         t for t in st.session_state.form_submissions 
         if current_time - t < 3600
     ]
-    if len(st.session_state.form_submissions) >= 5:
-        return False
-    return True
+    return len(st.session_state.form_submissions) < 5
 
 def save_message_to_db(name, email, message):
-    """Save contact messages with enhanced security"""
+    """Save contact messages"""
     try:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         message_id = hashlib.sha256(f"{name}{email}{timestamp}".encode()).hexdigest()[:16]
@@ -656,7 +1016,6 @@ def save_message_to_db(name, email, message):
                 with open(messages_file, "r") as f:
                     messages = json.load(f)
             except json.JSONDecodeError:
-                logger.warning("Corrupted messages file, creating new one")
                 messages = []
         
         messages.append(message_data)
@@ -691,15 +1050,21 @@ def send_email_notification(name, email, message):
         
         html_content = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; background: #0f0c29; padding: 40px;">
-            <div style="max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px;">
-                <h2 style="color: #7877c6;">✨ New Contact Form Submission</h2>
-                <p style="color: #fff;"><strong>Name:</strong> {name}</p>
-                <p style="color: #fff;"><strong>Email:</strong> {email}</p>
-                <p style="color: #fff;"><strong>Message:</strong></p>
-                <p style="color: #ddd;">{message}</p>
-                <hr style="border: 1px solid rgba(120,119,198,0.3);">
-                <p style="color: #999; font-size: 12px;">🤖 Automated notification • {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+        <body style="font-family: 'Courier New', monospace; background: #0a0a0a; padding: 40px;">
+            <div style="max-width: 600px; margin: 0 auto; background: rgba(0,255,65,0.05); padding: 40px; border-radius: 15px; border: 1px solid #00ff41;">
+                <h2 style="color: #00ff41; font-family: monospace;">⚡ NEW CONTACT FORM SUBMISSION</h2>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #00ff41;">
+                    <p style="color: #fff;"><strong style="color: #00ff41;">NAME:</strong> {name}</p>
+                    <p style="color: #fff;"><strong style="color: #00ff41;">EMAIL:</strong> {email}</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #7877c6;">
+                    <p style="color: #fff;"><strong style="color: #00ff41;">MESSAGE:</strong></p>
+                    <p style="color: #ddd; line-height: 1.8;">{message}</p>
+                </div>
+                <hr style="border: 1px solid rgba(0,255,65,0.2); margin: 30px 0;">
+                <p style="color: #999; font-size: 12px; text-align: center;">
+                    🤖 AUTOMATED NOTIFICATION • {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+                </p>
             </div>
         </body>
         </html>
@@ -712,14 +1077,14 @@ def send_email_notification(name, email, message):
             server.login(sender_email, sender_password)
             server.send_message(email_message)
         
-        logger.info(f"Email notification sent for: {name}")
+        logger.info(f"Email sent for: {name}")
         return True
     except Exception as e:
         logger.error(f"Error sending email: {e}")
         return False
 
 def is_valid_email(email):
-    """Enhanced email validation"""
+    """Email validation"""
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(email_pattern, email))
 
@@ -728,7 +1093,9 @@ def sanitize_input(text):
     return text.strip()[:500]
 
 # Portfolio data
-ABOUT = """Aspiring AI & Data Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4), and RAG pipelines. Interned at C-DAC Hyderabad, where I built AI-powered knowledge graphs, semantic search tools, and document analysis apps using Streamlit, SQLite3, and NetworkX. Strong in data visualization, NLP, and automated data processing. Open to roles in AI Engineering, Data Science, or Python Development."""
+ABOUT = """I'm an aspiring AI & Data Science Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4, LLaMA), and RAG pipelines. I interned at C-DAC Hyderabad, where I architected AI-powered knowledge graphs, semantic search engines, and document analysis systems using cutting-edge technologies like Streamlit, NetworkX, LangChain, and FAISS.
+
+I believe in practical learning and hands-on experience. If it's smart, it's vulnerable to innovation! 🚀"""
 
 WORK_EXPERIENCE = [
     {
@@ -736,10 +1103,11 @@ WORK_EXPERIENCE = [
         "position": "AI Engineering Intern",
         "duration": "June 2024 - August 2024",
         "details": [
-            "Built AI-powered knowledge graphs using NetworkX and GPT-4",
-            "Developed semantic search engine with LangChain and FAISS",
-            "Created document analysis chatbot using Streamlit and Ollama",
-            "Optimized data processing pipelines reducing latency by 40%"
+            "🔧 Built AI-powered knowledge graphs using NetworkX and GPT-4",
+            "🔍 Developed semantic search engine with LangChain and FAISS",
+            "💬 Created document analysis chatbot using Streamlit and Ollama",
+            "⚡ Optimized data processing pipelines reducing latency by 40%",
+            "📊 Implemented data visualization dashboards with Plotly"
         ],
         "image": "work_experience_cdac.png"
     },
@@ -748,10 +1116,11 @@ WORK_EXPERIENCE = [
         "position": "QA Testing Intern",
         "duration": "Feb 2024 - Apr 2024",
         "details": [
-            "Conducted automated and manual testing for mobile applications",
-            "Identified and documented 50+ software bugs with detailed reports",
-            "Collaborated with development teams for issue resolution",
-            "Improved test coverage by 30% using pytest"
+            "🧪 Conducted automated and manual testing for mobile applications",
+            "🐛 Identified and documented 50+ software bugs with detailed reports",
+            "🤝 Collaborated with development teams for rapid issue resolution",
+            "📈 Improved test coverage by 30% using pytest automation",
+            "✅ Ensured quality standards across multiple product releases"
         ],
         "image": "work_experience_oppo.jpg"
     }
@@ -760,86 +1129,90 @@ WORK_EXPERIENCE = [
 PROJECTS = [
     {
         "title": "Knowledge Graph Visualizer",
-        "description": "Interactive knowledge graph visualization system with semantic search capabilities",
-        "tech": ["Python", "NetworkX", "Streamlit", "Neo4j", "LangChain"],
+        "description": "Interactive knowledge graph visualization system with semantic search capabilities and AI-powered insights",
+        "tech": ["Python", "NetworkX", "Streamlit", "Neo4j", "LangChain", "GPT-4"],
         "link": "#",
         "image": "knowledge_graph.png"
     },
     {
         "title": "DocuGenius - Document Chat",
-        "description": "AI-powered document analysis and Q&A system using RAG pipelines",
-        "tech": ["Python", "LangChain", "GPT-4", "FAISS", "Streamlit"],
+        "description": "AI-powered document analysis and Q&A system using RAG pipelines with vector embeddings",
+        "tech": ["Python", "LangChain", "GPT-4", "FAISS", "Streamlit", "Ollama"],
         "link": "#",
         "image": "docugenius.png"
     },
     {
-        "title": "Student Dashboard",
-        "description": "Interactive analytics dashboard for student performance tracking",
-        "tech": ["Python", "Plotly", "Pandas", "Streamlit", "SQLite3"],
+        "title": "Student Analytics Dashboard",
+        "description": "Real-time interactive analytics dashboard for student performance tracking and predictive insights",
+        "tech": ["Python", "Plotly", "Pandas", "Streamlit", "SQLite3", "ML"],
         "link": "#",
         "image": "student_dashboard.png"
     },
     {
         "title": "APSPDCL Data Analysis",
-        "description": "Power distribution data analysis and visualization system",
-        "tech": ["Python", "Pandas", "Matplotlib", "Tableau"],
+        "description": "Power distribution data analysis and visualization system with anomaly detection",
+        "tech": ["Python", "Pandas", "Matplotlib", "Tableau", "NumPy"],
         "link": "#",
         "image": "apspdcl.jpg"
     }
 ]
 
 SKILLS = {
-    "Programming": ["Python", "JavaScript", "SQL", "C", "Go"],
-    "AI/ML": ["GPT-4", "LangChain", "LLaMA2", "FAISS", "RAG", "Ollama"],
-    "Data": ["Pandas", "NumPy", "Plotly", "SQLite3", "PostgreSQL"],
-    "Tools": ["Streamlit", "Neo4j", "NetworkX", "VS Code", "Git", "Docker"],
-    "Soft Skills": ["Problem Solving", "Communication", "Teamwork", "Leadership", "Documentation"]
+    "Programming Languages": ["Python", "JavaScript", "SQL", "C", "Go", "Bash"],
+    "AI/ML & LLMs": ["GPT-4", "LangChain", "LLaMA2", "FAISS", "RAG", "Ollama", "Hugging Face"],
+    "Data Science": ["Pandas", "NumPy", "Plotly", "Matplotlib", "Seaborn", "Scikit-learn"],
+    "Tools & Frameworks": ["Streamlit", "Neo4j", "NetworkX", "VS Code", "Git", "Docker", "Jupyter"],
+    "Databases": ["SQLite3", "PostgreSQL", "MongoDB", "Neo4j", "Vector DBs"],
+    "Soft Skills": ["Problem Solving", "Communication", "Teamwork", "Leadership", "Research"]
 }
 
 EDUCATION = [
     {
-        "institution": "KSRM College",
-        "degree": "B.Tech Computer Science",
+        "institution": "KSRM College of Engineering",
+        "degree": "B.Tech in Computer Science & Engineering",
         "year": "2023",
-        "gpa": "8.2/10",
+        "gpa": "8.2/10 CGPA",
+        "highlights": ["Top 10% of graduating class", "Academic Excellence Award", "Published research paper"],
         "image": "education.jpg"
     }
 ]
 
 CERTIFICATIONS = [
-    {"name": "Google AI Essentials", "issuer": "Google", "date": "2024"},
-    {"name": "Python for Data Science", "issuer": "Coursera", "date": "2023"}
+    {"name": "Google AI Essentials", "issuer": "Google", "date": "2024", "icon": "🎓"},
+    {"name": "Python for Data Science", "issuer": "Coursera", "date": "2023", "icon": "🐍"},
+    {"name": "Machine Learning Specialization", "issuer": "Stanford Online", "date": "2023", "icon": "🤖"},
+    {"name": "LangChain for LLM Application Development", "issuer": "DeepLearning.AI", "date": "2024", "icon": "⛓️"}
 ]
 
 def animated_background_plot(tab_key):
     """Create animated background visualizations"""
-    n = 600
-    x = np.linspace(0, 15, n)
+    n = 500
+    x = np.linspace(0, 10, n)
     noise = np.random.rand() * 2
-    y = np.sin(x + noise) * np.cos(x * 0.5) * random.uniform(1.5, 3.0)
+    y = np.sin(x + noise) * np.cos(x * 0.5) * random.uniform(1.2, 2.5)
     
     color_schemes = {
-        "about": px.colors.sequential.Purples,
-        "exp": px.colors.sequential.Blues,
-        "proj": px.colors.sequential.Teal,
-        "skills": px.colors.sequential.Plasma,
-        "edu": px.colors.sequential.Viridis,
-        "contact": px.colors.sequential.Sunset
+        "about": ["#00ff41", "#7877c6"],
+        "exp": ["#00ff41", "#ff006e"],
+        "proj": ["#7877c6", "#00ff41"],
+        "skills": ["#ff006e", "#7877c6"],
+        "edu": ["#00ff41", "#00ccff"],
+        "contact": ["#ff006e", "#00ff41"]
     }
     
-    colors = color_schemes.get(tab_key, px.colors.sequential.Plasma)
+    colors = color_schemes.get(tab_key, ["#00ff41", "#7877c6"])
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=x, y=y,
         mode='lines',
         line=dict(
-            color=colors[len(colors)//2],
-            width=5
+            color=colors[0],
+            width=3
         ),
         fill='tonexty',
-        fillcolor=f'rgba(120, 119, 198, 0.1)',
-        opacity=0.4
+        fillcolor=f'rgba(0, 255, 65, 0.05)',
+        opacity=0.3
     ))
     
     fig.update_layout(
@@ -849,7 +1222,7 @@ def animated_background_plot(tab_key):
         template=None,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        height=200
+        height=150
     )
     
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
@@ -858,78 +1231,95 @@ def main():
     """Main application function"""
     load_custom_css()
     
-    # Hero section
+    # Show preloader on first load
+    if not st.session_state.preloader_done:
+        show_preloader()
+        st.session_state.preloader_done = True
+    
+    # Hero section with glitch effect
     st.markdown("""
-    <div class="fade-in header-glow" style="text-align:center; padding:4rem 1.5rem;">
-        <h1 class="glow-text" style="font-size:4rem; margin-bottom:1rem;">
-            👨💻 Sivamahendranath Ragimanu
+    <div class="fade-in" style="text-align:center; padding:4rem 1.5rem 2rem;">
+        <h1 class="glow-text glitch" data-text="SIVAMAHENDRANATH RAGIMANU" style="font-size:3.5rem; margin-bottom:0.5rem;">
+            SIVAMAHENDRANATH RAGIMANU
         </h1>
-        <p style="font-size:1.4rem; opacity:0.95; margin-top:1.5rem; font-weight:300;">
-            🚀 AI & Data Science Professional | Python Developer | ML Engineer
+        <div class="typewriter" style="font-size:1.3rem; margin-top:1.5rem; display:inline-block;">
+            🚀 AI Engineer | ML Developer | Python Expert
+        </div>
+        <p style="font-size:1.1rem; opacity:0.8; margin-top:1.5rem; font-family:'Fira Code', monospace; color:#00ff41;">
+            > If it's smart, it's vulnerable to innovation! 💡
         </p>
-        <div class="animated-divider"></div>
+        <div class="animated-divider" style="margin-top:2.5rem;"></div>
     </div>
     """, unsafe_allow_html=True)
     
     # Navigation tabs
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "👤 About", 
-        "💼 Experience", 
-        "🚀 Projects", 
-        "🎯 Skills", 
-        "🎓 Education", 
-        "📧 Contact"
+        "👤 ABOUT", 
+        "💼 EXPERIENCE", 
+        "🚀 PROJECTS", 
+        "🎯 SKILLS", 
+        "🎓 EDUCATION", 
+        "📧 CONTACT"
     ])
     
     # About Tab
     with tab1:
         animated_background_plot("about")
-        col1, col2 = st.columns([1, 1.4], gap="large")
+        col1, col2 = st.columns([1, 1.5], gap="large")
         
         with col1:
             st.markdown('<div class="card-container float-animation">', unsafe_allow_html=True)
             profile_img = load_image(get_image_path("profile.jpeg"))
-            st.image(profile_img, width=320)
+            st.image(profile_img, width=340)
+            st.markdown("""
+            <div style="text-align:center; margin-top:1.5rem;">
+                <span class="skill-badge" style="margin:5px;">🐍 Python Expert</span>
+                <span class="skill-badge" style="margin:5px;">🤖 AI Engineer</span>
+                <span class="skill-badge" style="margin:5px;">📊 Data Scientist</span>
+            </div>
+            """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-            st.markdown("### 👋 About Me")
+            st.markdown("### 👨‍💻 About Me")
             st.write(ABOUT)
             
             st.markdown("### 🔗 Connect With Me")
             col_links = st.columns(4, gap="small")
             with col_links[0]:
-                st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com)")
+                st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=00ff41)](https://github.com)")
             with col_links[1]:
-                st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com)")
+                st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=00ff41)](https://linkedin.com)")
             with col_links[2]:
-                st.markdown("[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mahendraragimanu2@gmail.com)")
+                st.markdown("[![Email](https://img.shields.io/badge/Email-000000?style=for-the-badge&logo=gmail&logoColor=00ff41)](mailto:mahendraragimanu2@gmail.com)")
             with col_links[3]:
-                st.markdown("[![Resume](https://img.shields.io/badge/Resume-000000?style=for-the-badge&logo=adobe-acrobat&logoColor=white)](https://example.com)")
+                st.markdown("[![Resume](https://img.shields.io/badge/Resume-000000?style=for-the-badge&logo=adobe&logoColor=00ff41)](https://example.com)")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
     # Experience Tab
     with tab2:
         animated_background_plot("exp")
-        st.markdown("### 💼 Work Experience")
+        st.markdown("### 💼 Professional Experience")
         
         for idx, exp in enumerate(WORK_EXPERIENCE):
-            col1, col2 = st.columns([0.9, 1.1], gap="large")
+            col1, col2 = st.columns([0.85, 1.15], gap="large")
             
             with col1:
                 st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
                 exp_img = load_image(get_image_path(exp["image"]))
-                st.image(exp_img, width=250)
+                st.image(exp_img, width=280)
                 st.markdown('</div>', unsafe_allow_html=True)
             
             with col2:
                 st.markdown('<div class="card-container fade-in-delay-1">', unsafe_allow_html=True)
                 st.markdown(f"### {exp['company']}")
-                st.markdown(f"**📍 {exp['position']}** | {exp['duration']}")
+                st.markdown(f"**🎯 {exp['position']}**")
+                st.markdown(f"**📅 {exp['duration']}**")
+                st.markdown("#### Key Achievements:")
                 for detail in exp['details']:
-                    st.markdown(f"✅ {detail}")
+                    st.markdown(f"{detail}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             if idx < len(WORK_EXPERIENCE) - 1:
@@ -945,28 +1335,26 @@ def main():
             with cols[idx % 2]:
                 st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
                 proj_img = load_image(get_image_path(project["image"]))
-                st.image(proj_img, width=350)
+                st.image(proj_img, use_column_width=True)
                 st.markdown(f"#### {project['title']}")
                 st.write(project['description'])
-                st.markdown("**🛠️ Tech Stack:**")
+                st.markdown("**⚡ Tech Stack:**")
                 for tech in project['tech']:
                     st.markdown(f'<span class="skill-badge">{tech}</span>', unsafe_allow_html=True)
-                st.markdown(f"[View Project →]({project['link']})")
+                st.markdown(f"<br><br>[🔗 View Project →]({project['link']})", unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
     
     # Skills Tab
     with tab4:
         animated_background_plot("skills")
-        st.markdown("### 🎯 Technical Skills")
+        st.markdown("### 🎯 Technical Arsenal")
         
-        cols = st.columns(2, gap="large")
-        for idx, (category, skills) in enumerate(SKILLS.items()):
-            with cols[idx % 2]:
-                st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-                st.markdown(f"#### {category}")
-                for skill in skills:
-                    st.markdown(f'<span class="skill-badge">{skill}</span>', unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True)
+        for category, skills in SKILLS.items():
+            st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
+            st.markdown(f"#### {category}")
+            for skill in skills:
+                st.markdown(f'<span class="skill-badge">{skill}</span>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
     
     # Education Tab
     with tab5:
@@ -978,29 +1366,35 @@ def main():
         with col1:
             st.markdown('<div class="card-container float-animation">', unsafe_allow_html=True)
             edu_img = load_image(get_image_path(EDUCATION[0]["image"]))
-            st.image(edu_img, width=280)
+            st.image(edu_img, width=300)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             for edu in EDUCATION:
                 st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
                 st.markdown(f"### {edu['institution']}")
-                st.write(f"**{edu['degree']}** | {edu['year']}")
-                st.write(f"GPA: {edu['gpa']}")
+                st.markdown(f"**🎓 {edu['degree']}**")
+                st.markdown(f"**📅 {edu['year']} | 📊 GPA: {edu['gpa']}**")
+                st.markdown("#### 🏆 Highlights:")
+                for highlight in edu['highlights']:
+                    st.markdown(f"✨ {highlight}")
                 st.markdown('</div>', unsafe_allow_html=True)
             
             st.markdown('<div class="animated-divider"></div>', unsafe_allow_html=True)
             
-            st.markdown("#### 🏆 Certifications")
-            for cert in CERTIFICATIONS:
-                st.markdown('<div class="card-container fade-in-delay-1">', unsafe_allow_html=True)
-                st.markdown(f"✨ **{cert['name']}** - {cert['issuer']} ({cert['date']})")
-                st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("#### 🏅 Certifications")
+            cert_cols = st.columns(2, gap="medium")
+            for idx, cert in enumerate(CERTIFICATIONS):
+                with cert_cols[idx % 2]:
+                    st.markdown('<div class="card-container fade-in-delay-1">', unsafe_allow_html=True)
+                    st.markdown(f"{cert['icon']} **{cert['name']}**")
+                    st.markdown(f"*{cert['issuer']} • {cert['date']}*")
+                    st.markdown('</div>', unsafe_allow_html=True)
     
     # Contact Tab
     with tab6:
         animated_background_plot("contact")
-        st.markdown("### 📧 Get In Touch")
+        st.markdown("### 📧 Let's Connect!")
         
         col1, col2 = st.columns([1, 1], gap="large")
         
@@ -1008,32 +1402,49 @@ def main():
             st.markdown('<div class="card-container">', unsafe_allow_html=True)
             st.markdown("#### 📍 Contact Information")
             st.markdown("""
-            📍 **Location:** Anantapur, Andhra Pradesh, India  
-            📧 **Email:** [mahendraragimanu2@gmail.com](mailto:mahendraragimanu2@gmail.com)  
-            📱 **Phone:** +91 8106442744  
-            🌐 **Portfolio:** https://example.com
+            **📍 Location:** Anantapur, Andhra Pradesh, India  
+            **📧 Email:** [mahendraragimanu2@gmail.com](mailto:mahendraragimanu2@gmail.com)  
+            **📱 Phone:** +91 8106442744  
+            **🌐 Portfolio:** [https://example.com](https://example.com)  
+            **💼 LinkedIn:** [Connect with me](https://linkedin.com)  
+            **💻 GitHub:** [Check my repos](https://github.com)
             """)
+            
+            st.markdown("#### 🌟 Quick Stats")
+            stats_html = """
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                <div style="background:rgba(0,255,65,0.1); padding:15px; border-radius:10px; border:1px solid rgba(0,255,65,0.3); text-align:center;">
+                    <div style="font-size:2rem; font-weight:bold; color:#00ff41;">10+</div>
+                    <div style="font-size:0.9rem; opacity:0.8;">Projects</div>
+                </div>
+                <div style="background:rgba(120,119,198,0.1); padding:15px; border-radius:10px; border:1px solid rgba(120,119,198,0.3); text-align:center;">
+                    <div style="font-size:2rem; font-weight:bold; color:#7877c6;">5+</div>
+                    <div style="font-size:0.9rem; opacity:0.8;">Certifications</div>
+                </div>
+            </div>
+            """
+            st.markdown(stats_html, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
             st.markdown('<div class="card-container">', unsafe_allow_html=True)
-            st.markdown("#### ✉️ Send me a Message")
+            st.markdown("#### ✉️ Send a Message")
             
             with st.form("contact_form", clear_on_submit=True):
-                name = st.text_input("Your Name", placeholder="John Doe")
-                email = st.text_input("Your Email", placeholder="john@example.com")
-                message = st.text_area("Message", placeholder="Your message here...", height=120)
-                submit_button = st.form_submit_button("🚀 Send Message", use_container_width=True)
+                name = st.text_input("🔖 Your Name", placeholder="John Doe")
+                email = st.text_input("📧 Your Email", placeholder="john@example.com")
+                message = st.text_area("💬 Message", placeholder="Tell me about your project or just say hi!", height=130)
+                submit_button = st.form_submit_button("🚀 SEND MESSAGE", use_container_width=True)
                 
                 if submit_button:
                     if not rate_limit_check():
-                        st.error("❌ Too many submissions. Please try again later.")
+                        st.error("⚠️ Too many submissions. Please try again later.")
                     elif not name or not email or not message:
                         st.error("❌ Please fill in all fields")
                     elif not is_valid_email(email):
-                        st.error("❌ Please enter a valid email address")
+                        st.error("❌ Invalid email address")
                     elif len(message) < 10:
-                        st.error("❌ Message must be at least 10 characters")
+                        st.error("❌ Message too short (min 10 characters)")
                     else:
                         name = sanitize_input(name)
                         email = sanitize_input(email)
@@ -1042,26 +1453,31 @@ def main():
                         if save_message_to_db(name, email, message):
                             st.session_state.form_submissions.append(time.time())
                             send_email_notification(name, email, message)
-                            st.success("✅ Message sent successfully! I'll get back to you soon.", icon="🎉")
+                            st.success("✅ Message sent successfully! I'll respond ASAP.", icon="🎉")
                         else:
-                            st.error("❌ Failed to send message. Please try again.")
+                            st.error("❌ Failed to send. Please try again.")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
     # Footer
     st.markdown("""
     <div class="animated-divider" style="margin-top:5rem;"></div>
-    <div style="text-align:center; padding:3rem 1.5rem; opacity:0.9;">
-        <p style="font-size:1.05rem; margin-bottom:1rem;">
-            © 2025 Sivamahendranath Ragimanu | Crafted with ❤️ using Streamlit
+    <div style="text-align:center; padding:3rem 1.5rem 2rem; opacity:0.9;">
+        <p style="font-size:1.1rem; margin-bottom:0.8rem; font-family:'Space Grotesk', sans-serif; font-weight:600;">
+            © 2025 Sivamahendranath Ragimanu
         </p>
-        <p style="font-size:0.95rem; opacity:0.8; margin-top:1rem;">
-            ✨ Enhanced with Advanced Animations, Glassmorphism & Production Features
+        <p style="font-size:0.95rem; opacity:0.7; margin-top:0.8rem; font-family:'Fira Code', monospace;">
+            Built with 💚 using Streamlit | Inspired by Modern Cyberpunk Design
         </p>
-        <div class="fade-in" style="margin-top:1.5rem;">
-            <span class="glow-text" style="font-size:1.2rem;">
-                Let's build AI-powered solutions together! 🚀
+        <div class="fade-in" style="margin-top:2rem;">
+            <span class="glow-text" style="font-size:1.3rem; font-family:'Fira Code', monospace;">
+                > Let's build the future with AI! 🚀
             </span>
+        </div>
+        <div style="margin-top:2rem;">
+            <span class="skill-badge" style="cursor:pointer;">🌟 Star on GitHub</span>
+            <span class="skill-badge" style="cursor:pointer;">💼 Hire Me</span>
+            <span class="skill-badge" style="cursor:pointer;">☕ Buy me a coffee</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
