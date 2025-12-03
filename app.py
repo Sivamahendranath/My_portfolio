@@ -13,1535 +13,1171 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import re
 import json
-import random
-import logging
-from datetime import datetime
-import hashlib
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('app.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
-
-# Page config
+# Page configuration
 st.set_page_config(
-    page_title="Sivamahendranath Ragimanu | AI Developer",
-    page_icon="🚀",
+    page_title="Sivamahendranath Ragimanu | Portfolio",
+    page_icon="👨‍💻",
     layout="wide",
-    initial_sidebar_state="collapsed",
-    menu_items={
-        'Get Help': 'https://github.com/yourusername',
-        'Report a bug': 'mailto:mahendraragimanu2@gmail.com',
-        'About': '# AI-Powered Portfolio\nVersion 3.0 - Production Ready'
-    }
 )
-
-# Initialize session state
-if 'form_submissions' not in st.session_state:
-    st.session_state.form_submissions = []
-if 'page_loaded' not in st.session_state:
-    st.session_state.page_loaded = False
-if 'preloader_done' not in st.session_state:
-    st.session_state.preloader_done = False
-
-def load_custom_css():
-    """Enhanced CSS with advanced animated background"""
-    custom_css = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-        
-        /* ============ ROOT & GLOBAL VARIABLES ============ */
-        :root {
-            --primary-color: #00ff41;
-            --secondary-color: #7877c6;
-            --accent-color: #ff006e;
-            --bg-dark: #0a0a0a;
-            --bg-darker: #050505;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --glow-primary: rgba(0, 255, 65, 0.5);
-            --glow-secondary: rgba(120, 119, 198, 0.5);
-        }
-        
-        /* ============ GLOBAL STYLES ============ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            scroll-behavior: smooth;
-            overflow-x: hidden;
-        }
-        
-        /* ============ ANIMATED PARTICLE BACKGROUND ============ */
-        .particle-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-        }
-        
-        /* ============ STREAMLIT APP CONTAINER ============ */
-        [data-testid="stAppViewContainer"] {
-            background: transparent;
-            position: relative;
-        }
-        
-        [data-testid="stApp"] {
-            background: transparent;
-        }
-        
-        [data-testid="stHeader"] {
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
-        }
-        
-        [data-testid="stMainBlockContainer"] {
-            padding-top: 1rem;
-            padding-bottom: 3rem;
-            max-width: 100%;
-            position: relative;
-            z-index: 1;
-        }
-        
-        section[data-testid="stMain"] {
-            background: transparent;
-            padding: 0rem 1rem;
-        }
-        
-        /* ============ ANIMATED GRID OVERLAY ============ */
-        [data-testid="stAppViewContainer"]::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(0, 255, 65, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 65, 0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridMove 30s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes gridMove {
-            0% { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-        
-        /* ============ FLOATING GRADIENT ORBS ============ */
-        [data-testid="stAppViewContainer"]::after {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(0, 255, 65, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(120, 119, 198, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(255, 0, 110, 0.1) 0%, transparent 35%),
-                radial-gradient(circle at 10% 80%, rgba(0, 204, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 90% 20%, rgba(255, 195, 0, 0.08) 0%, transparent 40%);
-            animation: orbFloat 25s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        @keyframes orbFloat {
-            0%, 100% { 
-                transform: translate(0, 0) rotate(0deg) scale(1);
-                opacity: 0.6;
-            }
-            25% { 
-                transform: translate(100px, -100px) rotate(90deg) scale(1.2);
-                opacity: 0.8;
-            }
-            50% { 
-                transform: translate(-50px, 50px) rotate(180deg) scale(0.9);
-                opacity: 0.7;
-            }
-            75% { 
-                transform: translate(80px, 80px) rotate(270deg) scale(1.1);
-                opacity: 0.85;
-            }
-        }
-        
-        /* ============ WAVE ANIMATION LAYER ============ */
-        .wave-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-            opacity: 0.3;
-        }
-        
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: linear-gradient(180deg, transparent, rgba(0, 255, 65, 0.1));
-            border-radius: 100% 100% 0 0;
-            animation: wave 15s linear infinite;
-        }
-        
-        .wave:nth-child(2) {
-            background: linear-gradient(180deg, transparent, rgba(120, 119, 198, 0.08));
-            animation: wave 20s linear infinite reverse;
-            opacity: 0.7;
-        }
-        
-        .wave:nth-child(3) {
-            background: linear-gradient(180deg, transparent, rgba(255, 0, 110, 0.06));
-            animation: wave 25s linear infinite;
-            opacity: 0.5;
-        }
-        
-        @keyframes wave {
-            0% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(-25%) translateY(-20px); }
-            100% { transform: translateX(-50%) translateY(0); }
-        }
-        
-        /* ============ FLOATING GEOMETRIC SHAPES ============ */
-        .geometric-shapes {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-        
-        .shape {
-            position: absolute;
-            opacity: 0.05;
-            animation: floatShape 20s ease-in-out infinite;
-        }
-        
-        .shape:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation-duration: 25s;
-            animation-delay: 0s;
-        }
-        
-        .shape:nth-child(2) {
-            top: 60%;
-            left: 80%;
-            width: 100px;
-            height: 100px;
-            border: 2px solid var(--secondary-color);
-            transform: rotate(45deg);
-            animation-duration: 30s;
-            animation-delay: 2s;
-        }
-        
-        .shape:nth-child(3) {
-            top: 30%;
-            left: 70%;
-            width: 60px;
-            height: 60px;
-            border: 2px solid var(--accent-color);
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            animation-duration: 22s;
-            animation-delay: 4s;
-        }
-        
-        .shape:nth-child(4) {
-            top: 80%;
-            left: 20%;
-            width: 90px;
-            height: 90px;
-            border: 2px solid #00ccff;
-            border-radius: 20%;
-            animation-duration: 28s;
-            animation-delay: 1s;
-        }
-        
-        .shape:nth-child(5) {
-            top: 50%;
-            left: 50%;
-            width: 70px;
-            height: 70px;
-            border: 2px solid #ffc300;
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            animation-duration: 26s;
-            animation-delay: 3s;
-        }
-        
-        @keyframes floatShape {
-            0%, 100% {
-                transform: translate(0, 0) rotate(0deg);
-                opacity: 0.05;
-            }
-            25% {
-                transform: translate(50px, -50px) rotate(90deg);
-                opacity: 0.08;
-            }
-            50% {
-                transform: translate(-30px, 30px) rotate(180deg);
-                opacity: 0.06;
-            }
-            75% {
-                transform: translate(40px, 40px) rotate(270deg);
-                opacity: 0.09;
-            }
-        }
-        
-        /* ============ SCANLINE EFFECT ============ */
-        .scanline {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
-            box-shadow: 0 0 20px var(--glow-primary);
-            animation: scanlineMove 4s linear infinite;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.3;
-        }
-        
-        @keyframes scanlineMove {
-            0% { top: 0%; }
-            100% { top: 100%; }
-        }
-        
-        /* ============ PRELOADER ============ */
-        .preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            animation: preloaderFade 0.8s ease 3s forwards;
-        }
-        
-        @keyframes preloaderFade {
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-        
-        .preloader-content {
-            text-align: center;
-            animation: glitchPulse 2s ease-in-out infinite;
-        }
-        
-        .preloader-logo {
-            font-size: 4rem;
-            font-weight: 900;
-            font-family: 'Fira Code', monospace;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            animation: logoGlow 2s ease-in-out infinite;
-        }
-        
-        @keyframes logoGlow {
-            0%, 100% {
-                filter: drop-shadow(0 0 20px var(--glow-primary));
-            }
-            50% {
-                filter: drop-shadow(0 0 40px var(--glow-secondary)) drop-shadow(0 0 60px var(--glow-primary));
-            }
-        }
-        
-        .preloader-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            letter-spacing: 3px;
-            margin-top: 1rem;
-        }
-        
-        .loading-bar {
-            width: 300px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 2rem;
-        }
-        
-        .loading-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
-            animation: loadingProgress 3s ease-in-out forwards;
-            box-shadow: 0 0 20px var(--glow-primary);
-        }
-        
-        @keyframes loadingProgress {
-            from { width: 0%; }
-            to { width: 100%; }
-        }
-        
-        /* ============ CYBERPUNK TABS ============ */
-        [data-testid="stTabs"] {
-            position: relative;
-            z-index: 10;
-        }
-        
-        [data-testid="stTabs"] [data-baseweb="tab-list"] {
-            gap: 1rem;
-            animation: slideInDown 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            padding: 8px;
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 255, 65, 0.2);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
-        }
-        
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-100px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        [data-testid="stTabs"] [data-baseweb="tab"] {
-            height: 45px;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.7) !important;
-            font-size: 1rem;
-            letter-spacing: 1px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        [data-testid="stTabs"] [data-baseweb="tab"]:hover {
-            background: rgba(0, 255, 65, 0.1);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 10px 30px rgba(0, 255, 65, 0.2),
-                inset 0 0 20px rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.5);
-            color: var(--primary-color) !important;
-        }
-        
-        [data-testid="stTabs"] [aria-selected="true"] {
-            background: linear-gradient(135deg, rgba(0, 255, 65, 0.15), rgba(120, 119, 198, 0.1)) !important;
-            border: 1px solid var(--primary-color) !important;
-            box-shadow: 
-                0 0 30px var(--glow-primary),
-                inset 0 0 20px rgba(0, 255, 65, 0.1) !important;
-            color: var(--primary-color) !important;
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
-        
-        [data-testid="stTabs"] [aria-selected="true"]::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.3), transparent);
-            animation: scanLine 2s ease-in-out infinite;
-        }
-        
-        @keyframes scanLine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        
-        /* ============ CYBERPUNK GLASS CARDS ============ */
-        .card-container {
-            background: rgba(10, 10, 10, 0.6) !important;
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 20px;
-            padding: 30px 25px;
-            margin: 20px 0;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05),
-                0 0 20px rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.2);
-            position: relative;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: cardSlideUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-            overflow: hidden;
-        }
-        
-        @keyframes cardSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
-        .card-container:hover {
-            background: rgba(10, 10, 10, 0.8) !important;
-            transform: translateY(-10px);
-            box-shadow: 
-                0 20px 60px rgba(0, 255, 65, 0.15),
-                inset 0 1px 0 rgba(0, 255, 65, 0.2),
-                0 0 40px rgba(0, 255, 65, 0.1);
-            border: 1px solid rgba(0, 255, 65, 0.4);
-        }
-        
-        .card-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 30px;
-            height: 30px;
-            border-top: 2px solid var(--primary-color);
-            border-left: 2px solid var(--primary-color);
-            opacity: 0.5;
-            transition: all 0.3s ease;
-        }
-        
-        .card-container::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 30px;
-            height: 30px;
-            border-bottom: 2px solid var(--primary-color);
-            border-right: 2px solid var(--primary-color);
-            opacity: 0.5;
-            transition: all 0.3s ease;
-        }
-        
-        .card-container:hover::before,
-        .card-container:hover::after {
-            width: 60px;
-            height: 60px;
-            opacity: 1;
-        }
-        
-        .card-container > * {
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* ============ GLOWING HEADER TEXT ============ */
-        .glow-text {
-            font-family: 'Space Grotesk', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: textPulse 3s ease-in-out infinite;
-            font-weight: 900;
-            display: inline-block;
-            position: relative;
-        }
-        
-        @keyframes textPulse {
-            0%, 100% {
-                filter: brightness(1) drop-shadow(0 0 20px var(--glow-primary));
-            }
-            50% {
-                filter: brightness(1.4) drop-shadow(0 0 40px var(--glow-secondary));
-            }
-        }
-        
-        /* ============ TYPEWRITER EFFECT ============ */
-        .typewriter {
-            font-family: 'Fira Code', monospace;
-            color: var(--primary-color);
-            border-right: 2px solid var(--primary-color);
-            animation: typing 3.5s steps(40, end), blink 0.75s step-end infinite;
-            white-space: nowrap;
-            overflow: hidden;
-            display: inline-block;
-        }
-        
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        
-        @keyframes blink {
-            from, to { border-color: transparent; }
-            50% { border-color: var(--primary-color); }
-        }
-        
-        /* ============ GLITCH EFFECT ============ */
-        .glitch {
-            position: relative;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            animation: glitch 1s linear infinite;
-        }
-        
-        @keyframes glitch {
-            2%, 64% {
-                transform: translate(2px, 0) skew(0deg);
-            }
-            4%, 60% {
-                transform: translate(-2px, 0) skew(0deg);
-            }
-            62% {
-                transform: translate(0, 0) skew(5deg);
-            }
-        }
-        
-        .glitch:before,
-        .glitch:after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .glitch:before {
-            left: 2px;
-            text-shadow: -2px 0 var(--accent-color);
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
-        }
-        
-        .glitch:after {
-            left: -2px;
-            text-shadow: -2px 0 var(--primary-color);
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
-        }
-        
-        @keyframes glitch-anim {
-            0% { clip: rect(10px, 9999px, 31px, 0); }
-            20% { clip: rect(70px, 9999px, 71px, 0); }
-            40% { clip: rect(60px, 9999px, 130px, 0); }
-            60% { clip: rect(90px, 9999px, 110px, 0); }
-            80% { clip: rect(50px, 9999px, 90px, 0); }
-            100% { clip: rect(30px, 9999px, 50px, 0); }
-        }
-        
-        @keyframes glitch-anim2 {
-            0% { clip: rect(65px, 9999px, 119px, 0); }
-            20% { clip: rect(20px, 9999px, 40px, 0); }
-            40% { clip: rect(80px, 9999px, 120px, 0); }
-            60% { clip: rect(40px, 9999px, 60px, 0); }
-            80% { clip: rect(90px, 9999px, 150px, 0); }
-            100% { clip: rect(50px, 9999px, 100px, 0); }
-        }
-        
-        /* ============ NEON SKILL BADGES ============ */
-        .skill-badge {
-            display: inline-block;
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            padding: 10px 20px;
-            border-radius: 8px;
-            margin: 6px 8px;
-            font-family: 'Fira Code', monospace;
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: var(--primary-color) !important;
-            box-shadow: 
-                0 0 10px rgba(0, 255, 65, 0.2),
-                inset 0 0 10px rgba(0, 255, 65, 0.05);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .skill-badge:hover {
-            background: rgba(0, 255, 65, 0.15);
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 
-                0 0 30px var(--glow-primary),
-                inset 0 0 20px rgba(0, 255, 65, 0.1);
-            border: 1px solid var(--primary-color);
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
-        
-        .skill-badge::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(0, 255, 65, 0.3) 50%,
-                transparent 70%
-            );
-            transform: rotate(45deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-        
-        .skill-badge:hover::before {
-            opacity: 1;
-            left: 100%;
-        }
-        
-        /* ============ 3D IMAGE CONTAINERS ============ */
-        .image-container {
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(0, 255, 65, 0.2);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            border: 1px solid rgba(0, 255, 65, 0.3);
-        }
-        
-        .image-container:hover {
-            transform: translateY(-8px) scale(1.03);
-            box-shadow: 
-                0 20px 60px rgba(0, 255, 65, 0.3),
-                0 0 40px var(--glow-primary);
-            border: 1px solid var(--primary-color);
-        }
-        
-        .image-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-            transition: transform 0.5s;
-            filter: brightness(0.9);
-        }
-        
-        .image-container:hover img {
-            transform: scale(1.05);
-            filter: brightness(1);
-        }
-        
-        /* ============ NEON DIVIDERS ============ */
-        .animated-divider {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary-color), var(--secondary-color), var(--accent-color), transparent);
-            margin: 2rem 0;
-            animation: dividerGlow 3s ease-in-out infinite;
-            box-shadow: 0 0 20px var(--glow-primary);
-            border-radius: 2px;
-            position: relative;
-        }
-        
-        @keyframes dividerGlow {
-            0%, 100% {
-                opacity: 0.6;
-                box-shadow: 0 0 20px var(--glow-primary);
-            }
-            50% {
-                opacity: 1;
-                box-shadow: 0 0 40px var(--glow-primary);
-            }
-        }
-        
-        .animated-divider::after {
-            content: '';
-            position: absolute;
-            top: -3px;
-            width: 8px;
-            height: 8px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--glow-primary);
-            animation: dotMove 3s linear infinite;
-        }
-        
-        @keyframes dotMove {
-            0% { left: 0%; }
-            100% { left: 100%; }
-        }
-        
-        /* ============ FADE ANIMATIONS ============ */
-        .fade-in {
-            animation: fadeInUp 1s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-        }
-        
-        .fade-in-delay-1 { animation-delay: 0.2s; }
-        .fade-in-delay-2 { animation-delay: 0.4s; }
-        .fade-in-delay-3 { animation-delay: 0.6s; }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* ============ FLOAT ANIMATION ============ */
-        .float-animation {
-            animation: floatUpDown 4s ease-in-out infinite;
-        }
-        
-        @keyframes floatUpDown {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
-        
-        /* ============ BUTTONS ============ */
-        .stButton > button {
-            background: linear-gradient(135deg, rgba(0, 255, 65, 0.2), rgba(120, 119, 198, 0.2));
-            color: var(--primary-color) !important;
-            padding: 14px 32px;
-            border: 1px solid var(--primary-color);
-            border-radius: 10px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 65, 0.3),
-                inset 0 0 10px rgba(0, 255, 65, 0.1);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stButton > button:hover {
-            transform: translateY(-3px);
-            box-shadow: 
-                0 10px 40px var(--glow-primary),
-                inset 0 0 20px rgba(0, 255, 65, 0.2);
-            background: linear-gradient(135deg, rgba(0, 255, 65, 0.3), rgba(120, 119, 198, 0.3));
-            border: 1px solid var(--primary-color);
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
-        
-        .stButton > button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s;
-        }
-        
-        .stButton > button:hover::before {
-            left: 100%;
-        }
-        
-        /* ============ FORM INPUTS ============ */
-        .stTextInput > div > div > input,
-        .stTextArea > div > div > textarea {
-            background: rgba(0, 0, 0, 0.5) !important;
-            border: 1px solid rgba(0, 255, 65, 0.3) !important;
-            color: var(--text-primary) !important;
-            padding: 16px 20px !important;
-            border-radius: 10px !important;
-            font-family: 'Fira Code', monospace !important;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stTextInput > div > div > input:focus,
-        .stTextArea > div > div > textarea:focus {
-            background: rgba(0, 0, 0, 0.7) !important;
-            border: 1px solid var(--primary-color) !important;
-            box-shadow: 
-                0 0 30px var(--glow-primary),
-                inset 0 0 15px rgba(0, 255, 65, 0.1) !important;
-            transform: translateY(-2px);
-        }
-        
-        /* ============ TEXT COLORS ============ */
-        .stMarkdown, p, h1, h2, h3, h4, h5, h6, span, div, li {
-            color: var(--text-primary) !important;
-        }
-        
-        h1, h2, h3 {
-            font-family: 'Space Grotesk', sans-serif !important;
-            font-weight: 700 !important;
-        }
-        
-        /* ============ CUSTOM SCROLLBAR ============ */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
-            border-radius: 10px;
-            box-shadow: 0 0 10px var(--glow-primary);
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--secondary-color), var(--accent-color));
-            box-shadow: 0 0 20px var(--glow-secondary);
-        }
-        
-        /* ============ RESPONSIVE DESIGN ============ */
-        @media (max-width: 768px) {
-            .preloader-logo {
-                font-size: 2.5rem;
-            }
-            
-            .card-container {
-                padding: 20px 15px;
-                margin: 15px 0;
-            }
-            
-            [data-testid="stTabs"] [data-baseweb="tab"] {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-            }
-            
-            .glow-text {
-                font-size: 1.8rem !important;
-            }
-            
-            .skill-badge {
-                padding: 8px 14px;
-                font-size: 0.85rem;
-            }
-            
-            .shape {
-                display: none;
-            }
-        }
-        
-        /* ============ PERFORMANCE ============ */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-        
-        a {
-            color: var(--primary-color) !important;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        a:hover {
-            color: var(--secondary-color) !important;
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
-    </style>
-    """
-    st.markdown(custom_css, unsafe_allow_html=True)
-
-def show_animated_background():
-    """Display animated background layers"""
-    background_html = """
-    <!-- Wave Container -->
-    <div class="wave-container">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
-    </div>
-    
-    <!-- Geometric Shapes -->
-    <div class="geometric-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
-    
-    <!-- Scanline Effect -->
-    <div class="scanline"></div>
-    """
-    st.markdown(background_html, unsafe_allow_html=True)
-
-def show_preloader():
-    """Display preloader animation"""
-    preloader_html = """
-    <div class="preloader">
-        <div class="preloader-content">
-            <div class="preloader-logo">🚀</div>
-            <div class="preloader-text">INITIALIZING AI PORTFOLIO...</div>
-            <div class="loading-bar">
-                <div class="loading-bar-fill"></div>
-            </div>
-        </div>
-    </div>
-    <script>
-        setTimeout(() => {
-            document.querySelector('.preloader').style.display = 'none';
-        }, 3000);
-    </script>
-    """
-    st.markdown(preloader_html, unsafe_allow_html=True)
-
+# Function to get image path
 def get_image_path(relative_path):
-    """Secure image path resolution"""
-    try:
-        base_path = Path(__file__).parent / "images"
-        full_path = base_path / relative_path
-        if not full_path.is_file():
-            logger.warning(f"Image not found: {relative_path}")
-            return None
-        return str(full_path)
-    except Exception as e:
-        logger.error(f"Error resolving image path: {e}")
-        return None
+    """Get absolute path for an image based on relative path"""
+    # Define the base path for your images
+    # When deployed, this should be relative to your app's main script
+    base_path = Path(__file__).parent / "images"
+    return str(base_path / relative_path)
 
+# Function to load an image safely
 def load_image(image_path):
-    """Load image with error handling"""
+    """Load an image from path, with error handling"""
     try:
-        if image_path and os.path.exists(image_path):
-            return Image.open(image_path)
-        else:
-            return get_placeholder_image(400, 400, color="#00ff41")
+        return Image.open(image_path)
+    except FileNotFoundError:
+        st.warning(f"Image not found: {image_path}")
+        # Return a placeholder image instead
+        return get_placeholder_image(400, 300, color="#5846f6")
     except Exception as e:
-        logger.error(f"Error loading image {image_path}: {e}")
-        return get_placeholder_image(400, 400, color="#00ff41")
+        st.warning(f"Error loading image {image_path}: {str(e)}")
+        return get_placeholder_image(400, 300, color="#5846f6")
 
-def get_placeholder_image(width, height, color="#00ff41"):
-    """Generate placeholder image"""
+# Function to verify image paths exist
+def verify_image_paths():
+    """Verify all image paths exist and are accessible"""
+    image_paths = [
+        "profile.jpeg",
+        "about_me.jpeg",
+        "work_experience_cdac.png",
+        "work_experience_oppo.jpg",
+        "knowledge_graph.png",
+        "docugenius.png",
+        "student_dashboard.png",
+        "apspdcl.jpg",
+        "exam_proctor.jpg",
+        "smart_fan.jpg",
+        "education.jpg",
+    ]
+    
+    missing_images = []
+    for path in image_paths:
+        full_path = get_image_path(path)
+        if not os.path.exists(full_path):
+            missing_images.append(path)
+    
+    if missing_images:
+        st.sidebar.warning("Missing images detected!")
+        with st.sidebar.expander("Show missing images"):
+            for img in missing_images:
+                st.write(f"- {img}")
+    else:
+        st.sidebar.success("All image paths verified!")
+
+# Generate placeholder images programmatically instead of using web URLs
+def get_placeholder_image(width, height, color="#5846f6"):
+    """Generate a placeholder image using PIL"""
     img = Image.new('RGB', (width, height), color=color)
     return img
 
-def rate_limit_check():
-    """Rate limiting"""
-    current_time = time.time()
-    st.session_state.form_submissions = [
-        t for t in st.session_state.form_submissions 
-        if current_time - t < 3600
-    ]
-    return len(st.session_state.form_submissions) < 5
-
+# Function to save message to database (JSON file for simplicity)
 def save_message_to_db(name, email, message):
-    """Save contact messages"""
-    try:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message_id = hashlib.sha256(f"{name}{email}{timestamp}".encode()).hexdigest()[:16]
-        
-        message_data = {
-            "id": message_id,
-            "name": name,
-            "email": email,
-            "message": message,
-            "timestamp": timestamp,
-            "read": False
-        }
-        
-        db_path = Path(__file__).parent / "data"
-        db_path.mkdir(exist_ok=True)
-        messages_file = db_path / "contact_messages.json"
-        
-        messages = []
-        if messages_file.exists():
+    """Save contact message to a JSON file that acts as a simple database"""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    message_data = {
+        "name": name,
+        "email": email,
+        "message": message,
+        "timestamp": timestamp,
+        "read": False
+    }
+    
+    # Check if database file exists, create if not
+    db_path = Path(__file__).parent / "data"
+    db_path.mkdir(exist_ok=True)
+    
+    messages_file = db_path / "contact_messages.json"
+    
+    if messages_file.exists():
+        with open(messages_file, "r") as f:
             try:
-                with open(messages_file, "r") as f:
-                    messages = json.load(f)
+                messages = json.load(f)
             except json.JSONDecodeError:
                 messages = []
-        
-        messages.append(message_data)
-        
-        with open(messages_file, "w") as f:
-            json.dump(messages, f, indent=4)
-        
-        logger.info(f"Message saved: {message_id}")
-        return True
-    except Exception as e:
-        logger.error(f"Error saving message: {e}")
-        return False
+    else:
+        messages = []
+    
+    messages.append(message_data)
+    
+    with open(messages_file, "w") as f:
+        json.dump(messages, f, indent=4)
+    
+    return True
 
+# Function to send email notification
 def send_email_notification(name, email, message):
-    """Send email notification"""
+    """Send an email notification when a contact form is submitted"""
     try:
+        # Get email credentials from environment variables
         smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = int(os.getenv("SMTP_PORT", "587"))
         sender_email = os.getenv("SENDER_EMAIL")
         sender_password = os.getenv("SENDER_PASSWORD")
         recipient_email = os.getenv("RECIPIENT_EMAIL", "mahendraragimanu2@gmail.com")
         
-        if not all([sender_email, sender_password]):
-            logger.warning("Email credentials not configured")
+        # Check if credentials are available
+        if not all([sender_email, sender_password, recipient_email]):
+            st.warning("Email credentials not configured properly. Email notification not sent.")
             return False
         
-        subject = f"🚀 New Portfolio Contact from {name}"
+        # Create email content
+        subject = f"New Portfolio Contact from {name}"
+        
+        # Create a multipart message
         email_message = MIMEMultipart()
         email_message["From"] = sender_email
         email_message["To"] = recipient_email
         email_message["Subject"] = subject
         
+        # Create HTML content for the email
         html_content = f"""
         <html>
-        <body style="font-family: 'Courier New', monospace; background: #0a0a0a; padding: 40px;">
-            <div style="max-width: 600px; margin: 0 auto; background: rgba(0,255,65,0.05); padding: 40px; border-radius: 15px; border: 1px solid #00ff41;">
-                <h2 style="color: #00ff41;">⚡ NEW CONTACT FORM SUBMISSION</h2>
-                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #00ff41;">
-                    <p style="color: #fff;"><strong style="color: #00ff41;">NAME:</strong> {name}</p>
-                    <p style="color: #fff;"><strong style="color: #00ff41;">EMAIL:</strong> {email}</p>
-                </div>
-                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 3px solid #7877c6;">
-                    <p style="color: #fff;"><strong style="color: #00ff41;">MESSAGE:</strong></p>
-                    <p style="color: #ddd;">{message}</p>
-                </div>
-                <hr style="border: 1px solid rgba(0,255,65,0.2);">
-                <p style="color: #999; font-size: 12px; text-align: center;">
-                    🤖 {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-                </p>
-            </div>
-        </body>
+            <body>
+                <h2>New Contact Message from Your Portfolio</h2>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Message:</strong></p>
+                <p>{message}</p>
+                <hr>
+                <p><em>This is an automated notification from your portfolio website.</em></p>
+            </body>
         </html>
         """
         
+        # Attach HTML content
         email_message.attach(MIMEText(html_content, "html"))
         
+        # Connect to SMTP server
         with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
+            server.starttls()  # Secure the connection
             server.login(sender_email, sender_password)
             server.send_message(email_message)
         
-        logger.info(f"Email sent for: {name}")
         return True
     except Exception as e:
-        logger.error(f"Error sending email: {e}")
+        st.error(f"Failed to send email: {str(e)}")
         return False
 
+# Email validation function
 def is_valid_email(email):
-    """Email validation"""
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    """Validate email format using regex"""
+    email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     return bool(re.match(email_pattern, email))
 
-def sanitize_input(text):
-    """Sanitize input"""
-    return text.strip()[:500]
+# Include Font Awesome for icons
+st.markdown("""
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+""", unsafe_allow_html=True)
 
-# Portfolio data
-ABOUT = """I'm an aspiring AI & Data Science Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4, LLaMA), and RAG pipelines. I interned at C-DAC Hyderabad, where I architected AI-powered knowledge graphs, semantic search engines, and document analysis systems using cutting-edge technologies.
-
-I believe in practical learning and hands-on experience. If it's smart, it's vulnerable to innovation! 🚀"""
-
-WORK_EXPERIENCE = [
-    {
-        "company": "C-DAC Hyderabad",
-        "position": "AI Engineering Intern",
-        "duration": "June 2024 - August 2024",
-        "details": [
-            "🔧 Built AI-powered knowledge graphs using NetworkX and GPT-4",
-            "🔍 Developed semantic search engine with LangChain and FAISS",
-            "💬 Created document analysis chatbot using Streamlit and Ollama",
-            "⚡ Optimized data processing pipelines reducing latency by 40%",
-            "📊 Implemented data visualization dashboards with Plotly"
-        ],
-        "image": "work_experience_cdac.png"
-    },
-    {
-        "company": "Oppo Mobiles India",
-        "position": "QA Testing Intern",
-        "duration": "Feb 2024 - Apr 2024",
-        "details": [
-            "🧪 Conducted automated and manual testing for mobile applications",
-            "🐛 Identified and documented 50+ software bugs with detailed reports",
-            "🤝 Collaborated with development teams for rapid issue resolution",
-            "📈 Improved test coverage by 30% using pytest automation",
-            "✅ Ensured quality standards across multiple product releases"
-        ],
-        "image": "work_experience_oppo.jpg"
+# Improved CSS styling
+st.markdown("""
+<style>
+    /* Basic styling */
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
     }
-]
-
-PROJECTS = [
-    {
-        "title": "Knowledge Graph Visualizer",
-        "description": "Interactive knowledge graph visualization system with semantic search capabilities and AI-powered insights",
-        "tech": ["Python", "NetworkX", "Streamlit", "Neo4j", "LangChain", "GPT-4"],
-        "link": "#",
-        "image": "knowledge_graph.png"
-    },
-    {
-        "title": "DocuGenius - Document Chat",
-        "description": "AI-powered document analysis and Q&A system using RAG pipelines with vector embeddings",
-        "tech": ["Python", "LangChain", "GPT-4", "FAISS", "Streamlit", "Ollama"],
-        "link": "#",
-        "image": "docugenius.png"
-    },
-    {
-        "title": "Student Analytics Dashboard",
-        "description": "Real-time interactive analytics dashboard for student performance tracking and predictive insights",
-        "tech": ["Python", "Plotly", "Pandas", "Streamlit", "SQLite3", "ML"],
-        "link": "#",
-        "image": "student_dashboard.png"
-    },
-    {
-        "title": "APSPDCL Data Analysis",
-        "description": "Power distribution data analysis and visualization system with anomaly detection",
-        "tech": ["Python", "Pandas", "Matplotlib", "Tableau", "NumPy"],
-        "link": "#",
-        "image": "apspdcl.jpg"
+    .highlight {
+        color: #5846f6;
     }
-]
+    .section-header h2 {
+        border-bottom: 2px solid #5846f6;
+        padding-bottom: 10px;
+        margin-top: 30px;
+    }
+    .custom-card {
+        border-left: 4px solid #5846f6;
+        padding: 15px;
+        margin: 15px 0;
+        background-color: rgba(88, 70, 246, 0.05);
+    }
+    .fade-in {
+        animation: fadeIn 1s ease-in;
+    }
+    .skill-container {
+        margin: 15px 0;
+    }
+    .skill-bar-container {
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        height: 10px;
+        width: 100%;
+    }
+    .skill-bar {
+        background-color: #5846f6;
+        border-radius: 10px;
+        height: 10px;
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 30px;
+        margin-bottom: 30px;
+    }
+    .timeline-dot {
+        position: absolute;
+        left: 0;
+        top: 5px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background-color: #5846f6;
+    }
+    .timeline-date {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .timeline-content {
+        margin-left: 10px;
+    }
+    .footer {
+        margin-top: 50px;
+        padding: 20px 0;
+        text-align: center;
+        border-top: 1px solid #e0e0e0;
+    }
+    .key-points {
+        margin-top: 15px;
+    }
+    .key-point {
+        margin-bottom: 8px;
+    }
+    .key-point i {
+        margin-right: 10px;
+        color: #5846f6;
+    }
+    .project-meta {
+        margin: 20px 0;
+    }
+    .project-meta div {
+        margin-bottom: 10px;
+    }
+    .project-meta i {
+        margin-right: 10px;
+        color: #5846f6;
+    }
+    .tech-stack {
+        margin-top: 20px;
+    }
+    .tech-badge {
+        display: inline-block;
+        background-color: rgba(88, 70, 246, 0.1);
+        color: #5846f6;
+        padding: 5px 10px;
+        margin: 5px;
+        border-radius: 15px;
+    }
+    .project-icon {
+        text-align: center;
+        color: #5846f6;
+        margin: 20px 0;
+    }
+    .project-details h3 {
+        margin-bottom: 15px;
+    }
+    .project-description {
+        font-style: italic;
+        margin-bottom: 20px;
+    }
+    .feature-list li {
+        margin-bottom: 10px;
+    }
+    .education-grade {
+        margin-top: 10px;
+    }
+    .education-grade i {
+        color: gold;
+    }
+    .language-card {
+        text-align: center;
+        padding: 15px;
+        background-color: rgba(88, 70, 246, 0.05);
+        border-radius: 10px;
+        margin: 10px;
+    }
+    .language-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    .contact-info {
+        margin: 20px 0;
+    }
+    .contact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .contact-item i {
+        font-size: 1.5rem;
+        color: #5846f6;
+        margin-right: 15px;
+        margin-top: 5px;
+    }
+    .social-links {
+        margin-top: 15px;
+    }
+    .social-links a {
+        margin: 0 10px;
+        color: #5846f6;
+        text-decoration: none;
+    }
+    .accomplishment-card {
+        display: flex;
+        align-items: flex-start;
+        background-color: rgba(88, 70, 246, 0.05);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+    .accomplishment-icon {
+        font-size: 1.5rem;
+        color: #5846f6;
+        margin-right: 15px;
+    }
+    .soft-skill-card {
+        text-align: center;
+        padding: 15px;
+        background-color: rgba(88, 70, 246, 0.05);
+        border-radius: 10px;
+        margin: 10px;
+    }
+    .soft-skill-card i {
+        font-size: 1.5rem;
+        color: #5846f6;
+        margin-bottom: 10px;
+    }
+    .profile-img {
+        border-radius: 50%;
+        max-width: 100%;
+        border: 3px solid #5846f6;
+    }
+    .contact-button {
+        background-color: #5846f6;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .contact-button:hover {
+        background-color: #4835d4;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .section-divider {
+        height: 50px;
+    }
+    .section {
+        padding: 30px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .section:last-child {
+        border-bottom: none;
+    }
+    .image-debug {
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    /* NEW: Skill category styling */
+    .skill-category {
+        margin-bottom: 30px;
+    }
+    .skill-category h3 {
+        color: #5846f6;
+        border-bottom: 1px solid rgba(88, 70, 246, 0.3);
+        padding-bottom: 8px;
+        margin-bottom: 15px;
+    }
+    .skill-category-icon {
+        font-size: 1.8rem;
+        margin-right: 10px;
+        color: #5846f6;
+        vertical-align: middle;
+    }
+    /* Form validation styles */
+    .form-error {
+        color: #ff4444;
+        font-size: 0.9rem;
+        margin-top: 2px;
+    }
+    .form-success {
+        color: #4CAF50;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: rgba(76, 175, 80, 0.1);
+        border-left: 4px solid #4CAF50;
+        margin: 10px 0;
+    }
+    .required-field:after {
+        content: " *";
+        color: #ff4444;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-SKILLS = {
-    "Programming Languages": ["Python", "JavaScript", "SQL", "C", "Go", "Bash"],
-    "AI/ML & LLMs": ["GPT-4", "LangChain", "LLaMA2", "FAISS", "RAG", "Ollama", "Hugging Face"],
-    "Data Science": ["Pandas", "NumPy", "Plotly", "Matplotlib", "Seaborn", "Scikit-learn"],
-    "Tools & Frameworks": ["Streamlit", "Neo4j", "NetworkX", "VS Code", "Git", "Docker", "Jupyter"],
-    "Databases": ["SQLite3", "PostgreSQL", "MongoDB", "Neo4j", "Vector DBs"],
-    "Soft Skills": ["Problem Solving", "Communication", "Teamwork", "Leadership", "Research"]
+# Create a simple sidebar for theme selection
+with st.sidebar:
+    st.title("Theme Settings")
+    theme = st.selectbox("Choose Theme", ["Blue", "Green"])
+    
+    # Apply theme via session state
+    if 'theme' not in st.session_state:
+        st.session_state.theme = theme
+    
+    if st.session_state.theme != theme:
+        st.session_state.theme = theme
+        st.rerun()
+    # Add social links in sidebar
+    st.markdown("---")
+    cols = st.columns(3)
+    cols[0].markdown(f'<a href="https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/" target="_blank"><i class="fab fa-linkedin fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+    cols[1].markdown(f'<a href="https://github.com/Sivamahendranath" target="_blank"><i class="fab fa-github fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+    cols[2].markdown(f'<a href="mailto:mahendraragimanu2@gmail.com" target="_blank"><i class="fas fa-envelope fa-2x" style="color: #5846f6;"></i></a>', unsafe_allow_html=True)
+
+# Apply the selected theme
+theme_colors = {
+    "Blue": {"bg": "#0a192f", "text": "#e6f1ff", "accent": "#64ffda"},
+    "Green": {"bg": "#0f1a0f", "text": "#e6ffe6", "accent": "#4dff4d"}
 }
 
-EDUCATION = [
+# Apply theme colors via CSS
+selected_theme = theme_colors[st.session_state.theme]
+st.markdown(f"""
+<style>
+    .stApp {{
+        background-color: {selected_theme["bg"]};
+        color: {selected_theme["text"]};
+    }}
+    .highlight, .section-header h2 {{
+        color: {selected_theme["accent"]} !important;
+    }}
+    .custom-card {{
+        border-left: 4px solid {selected_theme["accent"]};
+    }}
+    .skill-bar {{
+        background-color: {selected_theme["accent"]};
+    }}
+    .timeline-dot {{
+        background-color: {selected_theme["accent"]};
+    }}
+    .tech-badge {{
+        color: {selected_theme["accent"]};
+    }}
+    .project-icon {{
+        color: {selected_theme["accent"]};
+    }}
+    .contact-item i {{
+        color: {selected_theme["accent"]};
+    }}
+    .social-links a {{
+        color: {selected_theme["accent"]};
+    }}
+    .contact-button {{
+        background-color: {selected_theme["accent"]};
+    }}
+    .contact-button:hover {{
+        background-color: {selected_theme["accent"]};
+        opacity: 0.9;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
+# Main content - Now in scrolling format
+# SECTION 1: Home
+st.markdown('<div class="section" id="home">', unsafe_allow_html=True)
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.markdown("""
+    <div class="hero-section fade-in">
+        <h1>Sivamahendranath <span class="highlight">Ragimanu</span></h1>
+        <h3>🎓 Computer Science Graduate | Python Developer | Data Analyst | AI | Machine Learning Enthusiast</h3>
+        <p class="lead-text">Aspiring AI & Data Professional with hands-on experience in Python, Machine Learning, LLMs (GPT-4), and RAG pipelines. Interned at C-DAC Hyderabad, where I built AI-powered knowledge graphs, semantic search tools, and document analysis apps using Streamlit, SQLite3, and NetworkX.
+Strong in data visualization, NLP, and automated data processing. Prior internship at Oppo Mobiles enhanced my skills in testing, collaboration, and debugging.
+
+I'm driven to build smart, scalable, and impactful AI solutions that turn raw data into insights. Open to roles in AI Engineering, Data Science, or Python Development.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    # Load profile image
+    profile_image_path = get_image_path("profile.jpeg")
+    if os.path.exists(profile_image_path):
+        profile_img = load_image(profile_image_path)
+    else:
+        profile_img = get_placeholder_image(300, 300, color="#5846f6")
+    st.image(profile_img, use_container_width=True)
+
+# About Section
+st.markdown("<div class='section-header'><h2>About Me</h2></div>", unsafe_allow_html=True)
+
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    # Load about image
+    about_image_path = get_image_path("about_me.jpeg")
+    if os.path.exists(about_image_path):
+        about_img = load_image(about_image_path)
+    else:
+        about_img = get_placeholder_image(400, 400, color="#4a3bf5")
+    st.image(about_img, caption="Sivamahendranath Ragimanu", use_container_width=True)
+
+with col2:
+    st.markdown("""
+    <div class="about-text fade-in">
+        <p>Aspiring AI & Data Science professional skilled in Python, NLP, LLMs (GPT-4, LLaMA2), RAG pipelines, and Streamlit. Experienced in building offline-first AI applications, including document chatbots, knowledge graph visualizers, and semantic search tools.
+
+Interned at C-DAC Hyderabad, developing AI-powered solutions focused on data privacy and interactive insights. Gained hands-on testing and debugging experience at Oppo Mobiles India.
+
+Core skills: Python | GPT-4 | LangChain | Whisper | Ollama | NLP | SQLite3 | NetworkX | Data Visualization | OpenCV
+
+Open to roles in AI Engineering, Data Science, and Python Development.
+I am passionate about building scalable AI-powered solutions that emphasize data privacy, interactive user experience, and real-world impact.<br>
+Seeking opportunities in: AI Engineering, Data Science, Python Development, NLP Research. </p>
+</div>
+    """, unsafe_allow_html=True)
+    
+    # Add key points separately
+    st.markdown("""
+    <div class="key-points">
+        <div class="key-point"><i class="fas fa-map-marker-alt"></i> Anantapur,  Andhra Pradesh</div>
+        <div class="key-point"><i class="fas fa-phone"></i> 8106442744</div>
+        <div class="key-point"><i class="fas fa-envelope"></i> mahendraragimanu2@gmail.com</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+# SECTION 2: Skills & Experience
+st.markdown('<div class="section" id="skills">', unsafe_allow_html=True)
+st.markdown("<div class='section-header'><h2>Technical Skills</h2></div>", unsafe_allow_html=True)
+
+# NEW: Organized skills by category
+skill_categories = {
+    "Programming & Scripts": {
+        "icon": "fas fa-code",
+        "skills": [
+            "Python",
+            "Java"
+        ]
+    },
+    "Web Development": {
+        "icon": "fas fa-globe",
+        "skills": [
+            "HTML/CSS",
+            "JavaScript",
+            "Streamlit"
+        ]
+    },
+    "Database": {
+        "icon": "fas fa-database",
+        "skills": [
+            "SQL (Oracle)",
+            "SQLite"
+        ]
+    },
+    "Data Science & AI": {
+        "icon": "fas fa-brain",
+        "skills": [
+            "Machine Learning",
+            "Data Analysis",
+            "LLMs & RAG",
+            "Data Visualization"
+        ]
+    }
+}
+
+# Display skills by category - only skill names, no bars
+for category, data in skill_categories.items():
+    st.markdown(f"""
+    <div class="skill-category">
+        <h3><i class="{data['icon']} skill-category-icon"></i>{category}</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    skills_list = data["skills"]
+    half = len(skills_list) // 2 + len(skills_list) % 2
+    
+    with col1:
+        for skill in skills_list[:half]:
+            st.markdown(f"""
+            <div class="skill-container fade-in">
+                <div class="skill-name">{skill}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    with col2:
+        for skill in skills_list[half:]:
+            st.markdown(f"""
+            <div class="skill-container fade-in">
+                <div class="skill-name">{skill}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# Soft Skills
+st.markdown("<div class='section-header'><h2>Soft Skills</h2></div>", unsafe_allow_html=True)
+
+soft_skills = ["Communication", "Team Work", "Leadership", "Problem Solving", "Analytical Thinking"]
+
+col1, col2, col3 = st.columns(3)
+cols = [col1, col2, col3]
+
+for i, skill in enumerate(soft_skills):
+    with cols[i % 3]:
+        st.markdown(f"""
+        <div class="soft-skill-card fade-in">
+            <i class="fas fa-check-circle"></i>
+            <h4>{skill}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Work Experience
+st.markdown("<div class='section-header'><h2>Work Experience</h2></div>", unsafe_allow_html=True)
+
+# Load work experience image for CDAC
+cdac_img_path = get_image_path("work_experience_cdac.png")
+if os.path.exists(cdac_img_path):
+    exp_img = load_image(cdac_img_path)
+else:
+    exp_img = get_placeholder_image(800, 300, color="#3b2ff5")
+st.image(exp_img, caption="Work Experience at CDAC", use_container_width=True)
+
+# Experience 1
+st.markdown("""
+<div class="timeline fade-in">
+    <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">October 2024 - April 2025</div>
+        <div class="timeline-content custom-card">
+            <h3>Data Analyst (Python), Intern</h3>
+            <h4>C-DAC, Hyderabad</h4>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# List items for Experience 1
+st.markdown("""
+<ul style="margin-top: -20px; margin-left: 40px;">
+    <li>Analyzed and visualized complex datasets using Python, Pandas, and Matplotlib to uncover actionable business insights.</li>
+    <li>Extracted structured information from unstructured text using LLMs (GPT-4) and applied NLP techniques for deeper analysis.</li>
+    <li>Designed and managed SQLite3 databases to efficiently store, query, and retrieve knowledge graph data.</li>
+    <li>Built interactive data visualizations and semantic graphs using NetworkX and Pyvis for intuitive insight communication.</li>
+    <li>Automated data collection and enrichment using web scraping (BeautifulSoup), enhancing analysis depth 
+and accuracy.</li>
+</ul>
+""", unsafe_allow_html=True)
+
+# Load work experience image for OPPO
+oppo_img_path = get_image_path("work_experience_oppo.jpg")
+if os.path.exists(oppo_img_path):
+    oppo_img = load_image(oppo_img_path)
+    st.image(oppo_img, caption="Work Experience at OPPO", use_container_width=True)
+
+# Experience 2
+st.markdown("""
+<div class="timeline fade-in">
+    <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">February 2023 - August 2023</div>
+        <div class="timeline-content custom-card">
+            <h3>Device Testing, Intern</h3>
+            <h4>Oppo Mobiles India Ltd, Hyderabad (Remote)</h4>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# List items for Experience 2
+st.markdown("""
+<ul style="margin-top: -20px; margin-left: 40px;">
+    <li>Worked as a device testing engineer role in intern position.</li>
+    <li>Testing and checking the mobile device performance.</li>
+    <li>Finding the bugs in the device and reporting them to the team leader.</li>
+    <li>Communicating with team members and Developers, Giving and sharing the ideas for solving the bug issues and improving the device performance.</li>
+</ul>
+""", unsafe_allow_html=True)
+
+# Professional Accomplishments
+st.markdown("<div class='section-header'><h2>Professional Accomplishments</h2></div>", unsafe_allow_html=True)
+
+accomplishments = [
+    {"title": "Event Organizer", "icon": "fas fa-calendar-check", "detail": "Leading as an Event Organizer(Coding, Workshops) at KSRM College of Engineering."},
+    {"title": "Team Leader", "icon": "fas fa-users", "detail": "Serving as Team Leader for both minor and major projects at KSRM College of Engineering."},
+    {"title": "Coder", "icon": "fas fa-code", "detail": "Actively involved as a coder in the major project development."}
+]
+
+col1, col2 = st.columns(2)
+
+for i, acc in enumerate(accomplishments):
+    with col1 if i % 2 == 0 else col2:
+        st.markdown(f"""
+        <div class="accomplishment-card fade-in">
+            <div class="accomplishment-icon"><i class="{acc['icon']}"></i></div>
+            <div class="accomplishment-content">
+                <h4>{acc['title']}</h4>
+                <p>{acc['detail']}</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+# SECTION 3: Projects
+st.markdown('<div class="section" id="projects">', unsafe_allow_html=True)
+st.markdown("<div class='section-header'><h2>Personal Projects</h2></div>", unsafe_allow_html=True)
+
+# Define project images mapping
+project_images = {
+    "AI-Powered Knowledge Graph Explorer": "knowledge_graph.png",
+    "DocuGenius Pro": "docugenius.png",
+    "Student Performance Dashboards for Exams": "student_dashboard.png",
+    "Andhra Pradesh Southern Power Distribution Company Limited": "apspdcl.jpg",
+    "Exam Proctoring System": "exam_proctor.jpg",
+    "Smart Fan Energy System": "smart_fan.jpg"
+}
+
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    # Project image placeholder
+    project_img_path = get_image_path("main_project.jpg")
+    if os.path.exists(project_img_path):
+        project_img = load_image(project_img_path)
+    else:
+        project_img = get_placeholder_image(400, 300, color="#6557f1")
+    st.image(project_img, caption="Projects", use_container_width=True)
+
+with col2:
+    st.markdown("""
+    <div class="project-intro fade-in">
+        <p>I have worked on several projects that demonstrate my skills in Python, Machine Learning, 
+        Data Analysis, and IoT. Below are some of my key projects:</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Individual Projects with GitHub links
+projects = [
     {
-        "institution": "KSRM College of Engineering",
-        "degree": "B.Tech in Computer Science & Engineering",
-        "year": "2023",
-        "gpa": "8.2/10 CGPA",
-        "highlights": ["Top 10% of graduating class", "Academic Excellence Award", "Published research paper"],
-        "image": "education.jpg"
+        "title": "AI-Powered Knowledge Graph Explorer",
+         "date": "January 2025, March 2025",
+         "org": "C-DAC, Hyderabad",
+         "type": "Main Project",
+         "description": "AI-Powered Knowledge Graph Generator using LLMs and Graph Visualization Application using Streamlit",
+        "features": [
+             "Multi-Format Input Handling: Ingested and parsed raw input from Text files and Web URLs for seamless data processing",
+             "LLM-Based Entity Extraction: Leveraged Google Gemini API to extract entities, attributes, relationships, and contextual links.",
+            "Structured Data Storage: Stored parsed information in SQLite3 using a scalable, query-ready schema.",
+             "Interactive Graph Visualization: Built dynamic knowledge graphs with NetworkX and Pyvis,supporting node-click expansion.",
+             "Semantic Relationship Exploration: Enabled deep relationship analysis with continuous graph expansion and case study generation."
+
+        ],
+        "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Sqlite3","Plotly", "NLP", "NetworkX", "BeautifulSoup"],
+        "github": "https://github.com/Sivamahendranath/Gemini_Knowledge_Graph/blob/main/backup.py"
+    },
+    {
+        "title": "DocuGenius Pro",
+         "date": "January 2025",
+         "org": "C-DAC, Hyderabad",
+         "type": "Personal Mini Project",
+       "description": "AI-powered document processing application using Streamlit",
+        "features": [
+           "Multi-Format Document Processing: Extracts and processes Text, PDFs, CSVs, and Web URLs",
+             "AI-Powered Analysis: Leverages Google Gemini API for insights, summaries, and answers",
+             "Data Visualization: Creates interactive graphs and statistics for CSV data with Plotly",
+            "Named Entity Recognition (NER): Identifies key entities from processed documents",
+             "Query-Based Analysis: Allows users to ask questions based on document content",
+             "Customizable Themes & Export Analysis History"
+
+        ],
+       "tech_stack": ["Python", "Streamlit", "Google Gemini API", "Plotly", "NLP"],
+         "github": "https://github.com/Sivamahendranath/Gemini-Document-RAG/blob/main/code/main.py"
+    },
+    {
+        "title": "Student Performance Dashboards for Exams",
+         "date": "October 2024 - November 2024",
+         "org": "C-DAC, Hyderabad",
+        "type": "Mini Project",
+        "description": "Data visualization dashboards for analyzing student performance",
+        "features": [
+            "Cleaned and processed datasets, converting columns to numeric and handling missing data",
+             "Designed thresholds to classify performance into categories (Fail to Excellent)",
+             "Aggregated and summarized student performance metrics across lab and theory scores",
+             "Created diverse visualizations including pie charts, bar charts, stacked bars, heatmaps",
+            "Implemented advanced visualization techniques for trend analysis and insights",
+             "Optimized data workflows for decision-making"
+
+        ],
+        "tech_stack": ["Python", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Data Visualization"],
+         "github": "https://github.com/Sivamahendranath/Student-Performance-Dashboard"
+    },
+    {
+        "title": "Andhra Pradesh Southern Power Distribution Company Limited",
+         "date": "April 2024 - May 2024",
+         "org": "KSRM College Of Engineering, Kadapa",
+         "type": "Personal Mini Project",
+         "description": "Electricity Bill Calculator – Streamlit Web Application",
+        "features": [
+           "Multi-Tariff Bill Calculation: Calculates electricity bills for domestic, commercial, and industrial users with tiered and time-of-use tariff logic.",
+             "Interactive Visualizations: Uses Plotly to display consumption patterns and billing breakdown through dynamic charts and graphs.",
+             "PDF Bill Generation: Generates downloadable and printable bills in PDF format using ReportLab for professional documentation.",
+             "Usage History & Trends: Tracks historical electricity usage and visualizes spending trends to help users monitor and manage consumption.",
+             "Responsive UI Design: Built with Streamlit for a mobile-friendly, intuitive interface that works seamlessly across all devices.",
+            "Real-World Utility Integration: Tailored for APSPDCL with accurate tariff modeling, due date logic, and late fee calculations.",
+             "Modular Architecture: Structured with scalable components and future-ready plans including authentication, payments, and multi-language support."
+
+        ],
+        "tech_stack": ["Python", "Streamlit", "Plotly", "Pandas", "ReportLab", "HTML/CSS"],
+         "github": "https://github.com/Sivamahendranath/Electricity_Bill_App/blob/main/app.py",
+    },
+    {
+        "title": "Exam Proctoring System",
+         "date": "December 2023 - March 2024",
+        "org": "KSRM College Of Engineering, Kadapa",
+         "type": "Major Project",
+         "description": "Machine learning application for online exam proctoring",
+         "features": [
+            "Led a team and developed a machine learning application for online exam proctoring",
+             "Used OpenCV, Dlib, and Face Recognition Library for monitoring candidates",
+             "Monitored candidates' movements and flagged suspicious activities during exams",
+             "Implemented warning mechanisms and automatic termination for suspicious activities",
+             "Generated detailed malpractice reports, including activity graphs, for authorities"
+         ],
+         "tech_stack": ["Python", "OpenCV", "Dlib", "Face Recognition", "Machine Learning"],
+        "github": "https://github.com/Sivamahendranath/Exam-Proctoring-System",
+
+    },
+    {
+         "title": "Smart Fan Energy System",
+        "date": "July 2023 - September 2023",
+         "org": "KSRM College Of Engineering, Kadapa",
+         "type": "Minor Project",
+         "description": "IoT-based solution for optimizing energy usage in fan systems",
+         "features": [
+             "Led as Team Leader, Circuit Designer, and Arduino Coder",
+             "Combined hardware and software expertise using Arduino and sensors",
+            "Designed a cost-effective, customizable system for automating fan speed and power control",
+             "Created a system that increased energy efficiency by 25% compared to manual fan control",
+             "Implemented automatic temperature-based fan speed adjustment for optimal comfort"
+        ],
+         "tech_stack": ["Arduino", "IoT", "Sensors"],
+         "github": "https://github.com/Sivamahendranath/Smart-Fan-Energy-System",
+
     }
 ]
 
-CERTIFICATIONS = [
-    {"name": "Google AI Essentials", "issuer": "Google", "date": "2024", "icon": "🎓"},
-    {"name": "Python for Data Science", "issuer": "Coursera", "date": "2023", "icon": "🐍"},
-    {"name": "Machine Learning Specialization", "issuer": "Stanford Online", "date": "2023", "icon": "🤖"},
-    {"name": "LangChain for LLM Application Development", "issuer": "DeepLearning.AI", "date": "2024", "icon": "⛓️"}
+# Display projects in a nice format
+for i, project in enumerate(projects):
+    # Create columns for each project
+    if i % 2 == 0:
+        col1, col2 = st.columns(2)
+    
+    with col1 if i % 2 == 0 else col2:
+        # Get project image if available
+        img_path = get_image_path(project_images.get(project["title"], "placeholder.jpg"))
+        if os.path.exists(img_path):
+            project_img = load_image(img_path)
+        else:
+            project_img = get_placeholder_image(400, 300, color="#5846f6")
+        
+        st.image(project_img, caption=project["title"], use_container_width=True)
+        
+        st.markdown(f"""
+        <div class="project-details fade-in">
+            <h3>{project["title"]}</h3>
+            <div class="project-meta">
+                <div><i class="far fa-calendar-alt"></i> {project["date"]}</div>
+                <div><i class="fas fa-building"></i> {project["org"]}</div>
+                <div><i class="fas fa-tag"></i> {project["type"]}</div>
+            </div>
+            <p class="project-description">{project["description"]}</p>
+            <h4>Key Features:</h4>
+            <ul class="feature-list">
+                {"".join([f"<li>{feature}</li>" for feature in project["features"]])}
+            </ul>
+            <div class="tech-stack">
+                <h4>Tech Stack:</h4>
+                <div>
+                    {"".join([f'<span class="tech-badge">{tech}</span>' for tech in project["tech_stack"]])}
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <a href="{project["github"]}" target="_blank" style="color: #5846f6;">
+                    <i class="fab fa-github"></i> View on GitHub
+                </a>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Add separator after each row
+    if i % 2 == 1 or i == len(projects) - 1:
+        st.markdown("<hr>", unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+# SECTION 4: Education
+st.markdown('<div class="section" id="education">', unsafe_allow_html=True)
+st.markdown("<div class='section-header'><h2>Education</h2></div>", unsafe_allow_html=True)
+
+# Education image
+edu_img_path = get_image_path("education.jpg")
+if os.path.exists(edu_img_path):
+    edu_img = load_image(edu_img_path)
+else:
+    edu_img = get_placeholder_image(600, 400, color="#3527f5")
+st.image(edu_img, caption="Education Journey", use_container_width=True)
+
+# Education details with timeline
+education = [
+    {
+        "degree": "Bachelor of Engineering in Computer Science",
+        "institution": "KSRM College of Engineering, JNTUA",
+        "location": "Kadapa, Andhra Pradesh",
+        "duration": "2020 - 2024",
+        "grade": "8.3/10 CGPA",
+        "courses": ["programming and Scripting", "Data Structures", "Algorithms", "Database Management", "Web Development", "Machine Learning"]
+    },
+    {
+        "degree": "Intermediate (12th Grade)",
+        "institution": "JCDR Junior Junior College",
+        "location": "Anantapur, Andhra Pradesh",
+        "duration": "2018 - 2020",
+        "grade": "6.21/10 CGPA",
+        "courses": ["Mathematics", "Physics", "Chemistry"]
+    },
+    {
+        "degree": "Secondary School Certificate (10th Grade)",
+        "institution": "ZP High School",
+        "location": "Anantapur, Andhra Pradesh",
+        "duration": "2017 - 2018",
+        "grade": "9.0/10 GPA",
+        "courses": ["Mathematics", "Science", "Languages"]
+    }
 ]
 
-def animated_background_plot(tab_key):
-    """Create animated visualizations"""
-    n = 500
-    x = np.linspace(0, 10, n)
-    noise = np.random.rand() * 2
-    y = np.sin(x + noise) * np.cos(x * 0.5) * random.uniform(1.2, 2.5)
-    
-    colors = ["#00ff41", "#7877c6"]
-    
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=x, y=y,
-        mode='lines',
-        line=dict(color=colors[0], width=3),
-        fill='tonexty',
-        fillcolor=f'rgba(0, 255, 65, 0.05)',
-        opacity=0.3
-    ))
-    
-    fig.update_layout(
-        margin=dict(l=0, r=0, t=0, b=0),
-        xaxis=dict(showgrid=False, zeroline=False, visible=False),
-        yaxis=dict(showgrid=False, zeroline=False, visible=False),
-        template=None,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        height=150
-    )
-    
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-
-def main():
-    """Main application"""
-    load_custom_css()
-    
-    # Show animated background
-    show_animated_background()
-    
-    # Show preloader
-    if not st.session_state.preloader_done:
-        show_preloader()
-        st.session_state.preloader_done = True
-    
-    # Hero section
-    st.markdown("""
-    <div class="fade-in" style="text-align:center; padding:4rem 1.5rem 2rem;">
-        <h1 class="glow-text glitch" data-text="SIVAMAHENDRANATH RAGIMANU" style="font-size:3.5rem; margin-bottom:0.5rem;">
-            SIVAMAHENDRANATH RAGIMANU
-        </h1>
-        <div class="typewriter" style="font-size:1.3rem; margin-top:1.5rem; display:inline-block;">
-            🚀 AI Engineer | ML Developer | Python Expert
+for i, edu in enumerate(education):
+    st.markdown(f"""
+    <div class="timeline-item fade-in">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">{edu["duration"]}</div>
+        <div class="timeline-content custom-card">
+            <h3>{edu["degree"]}</h3>
+            <h4>{edu["institution"]}, {edu["location"]}</h4>
+            <div class="education-grade">
+                <span><i class="fas fa-star"></i> {edu["grade"]}</span>
+            </div>
+            <div class="key-courses" style="margin-top: 10px;">
+                <h5>Key Courses:</h5>
+                <p>{", ".join(edu["courses"])}</p>
+            </div>
         </div>
-        <p style="font-size:1.1rem; opacity:0.8; margin-top:1.5rem; font-family:'Fira Code', monospace; color:#00ff41;">
-            > If it's smart, it's vulnerable to innovation! 💡
-        </p>
-        <div class="animated-divider" style="margin-top:2.5rem;"></div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Navigation tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "👤 ABOUT", 
-        "💼 EXPERIENCE", 
-        "🚀 PROJECTS", 
-        "🎯 SKILLS", 
-        "🎓 EDUCATION", 
-        "📧 CONTACT"
-    ])
-    
-    # About Tab
-    with tab1:
-        animated_background_plot("about")
-        col1, col2 = st.columns([1, 1.5], gap="large")
-        
-        with col1:
-            st.markdown('<div class="card-container float-animation">', unsafe_allow_html=True)
-            profile_img = load_image(get_image_path("profile.jpeg"))
-            st.image(profile_img, width=340)
-            st.markdown("""
-            <div style="text-align:center; margin-top:1.5rem;">
-                <span class="skill-badge">🐍 Python Expert</span>
-                <span class="skill-badge">🤖 AI Engineer</span>
-                <span class="skill-badge">📊 Data Scientist</span>
+
+# Certifications & Trainings
+st.markdown("<div class='section-header'><h2>Certifications & Trainings</h2></div>", unsafe_allow_html=True)
+
+certifications = [
+    {
+        "title": "Certification of Completion Of WBL Internship [Data Analyst with Python]",
+        "issuer": "C-DAC, Hyderabad",
+        "date": "28-April-2025"
+    },
+    {
+       "title": "Certification of Completion, Python 3.X-Programming Course (Hands-On)",
+       "issuer": "Skill Rack",
+       "date": "02-August-2022" 
+    },
+    {
+       "title": "Certification of Completion Python-STARTER",
+       "issuer": "SKill Rack", 
+       "date": "03-August-2022"
+    },
+    {
+       "title": "Certfifcation of Completion PYTHON3.X - 50 VERY-EASY CHALLENGES", 
+       "issuer": "Skill Rack",
+       "date": "03-August-2022"
+    }
+]
+
+col1, col2 = st.columns(2)
+
+for i, cert in enumerate(certifications):
+    with col1 if i % 2 == 0 else col2:
+        st.markdown(f"""
+        <div class="custom-card fade-in">
+            <h4>{cert["title"]}</h4>
+            <p><i class="fas fa-certificate" style="color: #5846f6;"></i> {cert["issuer"]} | {cert["date"]}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+# Languages
+st.markdown("<div class='section-header'><h2>Languages</h2></div>", unsafe_allow_html=True)
+
+languages = [
+    {"name": "English", "proficiency": "Professional", "icon": "fas fa-comment-dots"},
+    {"name": "Telugu", "proficiency": "Native", "icon": "fas fa-comments"},
+    {"name": "Hindi", "proficiency": "Intermediate", "icon": "fas fa-comment-alt"}
+]
+
+cols = st.columns(3)
+
+for i, lang in enumerate(languages):
+    with cols[i]:
+        st.markdown(f"""
+        <div class="language-card fade-in">
+            <div class="language-icon">
+                <i class="{lang['icon']}"></i>
             </div>
-            """, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-            st.markdown("### 👨‍💻 About Me")
-            st.write(ABOUT)
-            
-            st.markdown("### 🔗 Connect With Me")
-            col_links = st.columns(4, gap="small")
-            with col_links[0]:
-                st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=00ff41)](https://github.com)")
-            with col_links[1]:
-                st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=00ff41)](https://linkedin.com)")
-            with col_links[2]:
-                st.markdown("[![Email](https://img.shields.io/badge/Email-000000?style=for-the-badge&logo=gmail&logoColor=00ff41)](mailto:mahendraragimanu2@gmail.com)")
-            with col_links[3]:
-                st.markdown("[![Resume](https://img.shields.io/badge/Resume-000000?style=for-the-badge&logo=adobe&logoColor=00ff41)](https://example.com)")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            <h4>{lang["name"]}</h4>
+            <p>{lang["proficiency"]}</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-divider"></div>', unsafe_allow_html=True)
+
+# SECTION 5: Contact Me
+st.markdown('<div class="section" id="contact">', unsafe_allow_html=True)
+st.markdown("<div class='section-header'><h2>Contact Me</h2></div>", unsafe_allow_html=True)
+
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    # Contact form with validation
+    st.markdown("<h3>Send me a message</h3>", unsafe_allow_html=True)
     
-    # Experience Tab
-    with tab2:
-        animated_background_plot("exp")
-        st.markdown("### 💼 Professional Experience")
-        
-        for idx, exp in enumerate(WORK_EXPERIENCE):
-            col1, col2 = st.columns([0.85, 1.15], gap="large")
-            
-            with col1:
-                st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-                exp_img = load_image(get_image_path(exp["image"]))
-                st.image(exp_img, width=280)
-                st.markdown('</div>', unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown('<div class="card-container fade-in-delay-1">', unsafe_allow_html=True)
-                st.markdown(f"### {exp['company']}")
-                st.markdown(f"**🎯 {exp['position']}**")
-                st.markdown(f"**📅 {exp['duration']}**")
-                st.markdown("#### Key Achievements:")
-                for detail in exp['details']:
-                    st.markdown(f"{detail}")
-                st.markdown('</div>', unsafe_allow_html=True)
-            
-            if idx < len(WORK_EXPERIENCE) - 1:
-                st.markdown('<div class="animated-divider"></div>', unsafe_allow_html=True)
+    # Initialize session state variables for form validation
+    if 'name_error' not in st.session_state:
+        st.session_state.name_error = ""
+    if 'email_error' not in st.session_state:
+        st.session_state.email_error = ""
+    if 'message_error' not in st.session_state:
+        st.session_state.message_error = ""
+    if 'form_submitted' not in st.session_state:
+        st.session_state.form_submitted = False
     
-    # Projects Tab
-    with tab3:
-        animated_background_plot("proj")
-        st.markdown("### 🚀 Featured Projects")
-        
-        cols = st.columns(2, gap="large")
-        for idx, project in enumerate(PROJECTS):
-            with cols[idx % 2]:
-                st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-                proj_img = load_image(get_image_path(project["image"]))
-                st.image(proj_img, use_column_width=True)
-                st.markdown(f"#### {project['title']}")
-                st.write(project['description'])
-                st.markdown("**⚡ Tech Stack:**")
-                for tech in project['tech']:
-                    st.markdown(f'<span class="skill-badge">{tech}</span>', unsafe_allow_html=True)
-                st.markdown(f"<br><br>[🔗 View Project →]({project['link']})", unsafe_allow_html=True)
-                st.markdown('</div>', unsafe_allow_html=True)
+    # Show success message if form has been submitted
+    if st.session_state.form_submitted:
+        st.markdown('<div class="form-success">Thank you for your message! I will get back to you soon.</div>', unsafe_allow_html=True)
+        st.session_state.form_submitted = False
     
-    # Skills Tab
-    with tab4:
-        animated_background_plot("skills")
-        st.markdown("### 🎯 Technical Arsenal")
+    # Create form
+    with st.form("contact_form", clear_on_submit=True):
+        # Name field with validation feedback
+        st.markdown('<label class="required-field">Name</label>', unsafe_allow_html=True)
+        name = st.text_input("", placeholder="Your name", key="name")
+        if st.session_state.name_error:
+            st.markdown(f'<div class="form-error">{st.session_state.name_error}</div>', unsafe_allow_html=True)
         
-        for category, skills in SKILLS.items():
-            st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-            st.markdown(f"#### {category}")
-            for skill in skills:
-                st.markdown(f'<span class="skill-badge">{skill}</span>', unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Education Tab
-    with tab5:
-        animated_background_plot("edu")
-        st.markdown("### 🎓 Education & Certifications")
+        # Email field with validation feedback
+        st.markdown('<label class="required-field">Email</label>', unsafe_allow_html=True)
+        email = st.text_input("", placeholder="Your email", key="email")
+        if st.session_state.email_error:
+            st.markdown(f'<div class="form-error">{st.session_state.email_error}</div>', unsafe_allow_html=True)
         
-        col1, col2 = st.columns([0.9, 1.1], gap="large")
+        # Message field with validation feedback
+        st.markdown('<label class="required-field">Message</label>', unsafe_allow_html=True)
+        message = st.text_area("", placeholder="Your message", height=150, key="message")
+        if st.session_state.message_error:
+            st.markdown(f'<div class="form-error">{st.session_state.message_error}</div>', unsafe_allow_html=True)
         
-        with col1:
-            st.markdown('<div class="card-container float-animation">', unsafe_allow_html=True)
-            edu_img = load_image(get_image_path(EDUCATION[0]["image"]))
-            st.image(edu_img, width=300)
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Submit button
+        submitted = st.form_submit_button("Send Message")
         
-        with col2:
-            for edu in EDUCATION:
-                st.markdown('<div class="card-container fade-in">', unsafe_allow_html=True)
-                st.markdown(f"### {edu['institution']}")
-                st.markdown(f"**🎓 {edu['degree']}**")
-                st.markdown(f"**📅 {edu['year']} | 📊 GPA: {edu['gpa']}**")
-                st.markdown("#### 🏆 Highlights:")
-                for highlight in edu['highlights']:
-                    st.markdown(f"✨ {highlight}")
-                st.markdown('</div>', unsafe_allow_html=True)
+        # Form validation
+        if submitted:
+            # Reset error messages
+            st.session_state.name_error = ""
+            st.session_state.email_error = ""
+            st.session_state.message_error = ""
             
-            st.markdown('<div class="animated-divider"></div>', unsafe_allow_html=True)
+            # Validate fields
+            valid_form = True
+            if not name.strip():
+                st.session_state.name_error = "Please enter your name."
+                valid_form = False
             
-            st.markdown("#### 🏅 Certifications")
-            cert_cols = st.columns(2, gap="medium")
-            for idx, cert in enumerate(CERTIFICATIONS):
-                with cert_cols[idx % 2]:
-                    st.markdown('<div class="card-container fade-in-delay-1">', unsafe_allow_html=True)
-                    st.markdown(f"{cert['icon']} **{cert['name']}**")
-                    st.markdown(f"*{cert['issuer']} • {cert['date']}*")
-                    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Contact Tab
-    with tab6:
-        animated_background_plot("contact")
-        st.markdown("### 📧 Let's Connect!")
-        
-        col1, col2 = st.columns([1, 1], gap="large")
-        
-        with col1:
-            st.markdown('<div class="card-container">', unsafe_allow_html=True)
-            st.markdown("#### 📍 Contact Information")
-            st.markdown("""
-            **📍 Location:** Anantapur, Andhra Pradesh, India  
-            **📧 Email:** [mahendraragimanu2@gmail.com](mailto:mahendraragimanu2@gmail.com)  
-            **📱 Phone:** +91 8106442744  
-            **🌐 Portfolio:** [https://example.com](https://example.com)
-            """)
+            if not email.strip():
+                st.session_state.email_error = "Please enter your email."
+                valid_form = False
+            elif not is_valid_email(email):
+                st.session_state.email_error = "Please enter a valid email address."
+                valid_form = False
             
-            st.markdown("#### 🌟 Quick Stats")
-            stats_html = """
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
-                <div style="background:rgba(0,255,65,0.1); padding:15px; border-radius:10px; border:1px solid rgba(0,255,65,0.3); text-align:center;">
-                    <div style="font-size:2rem; font-weight:bold; color:#00ff41;">10+</div>
-                    <div style="font-size:0.9rem; opacity:0.8;">Projects</div>
-                </div>
-                <div style="background:rgba(120,119,198,0.1); padding:15px; border-radius:10px; border:1px solid rgba(120,119,198,0.3); text-align:center;">
-                    <div style="font-size:2rem; font-weight:bold; color:#7877c6;">5+</div>
-                    <div style="font-size:0.9rem; opacity:0.8;">Certifications</div>
-                </div>
-            </div>
-            """
-            st.markdown(stats_html, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown('<div class="card-container">', unsafe_allow_html=True)
-            st.markdown("#### ✉️ Send a Message")
+            if not message.strip():
+                st.session_state.message_error = "Please enter your message."
+                valid_form = False
             
-            with st.form("contact_form", clear_on_submit=True):
-                name = st.text_input("🔖 Your Name", placeholder="John Doe")
-                email = st.text_input("📧 Your Email", placeholder="john@example.com")
-                message = st.text_area("💬 Message", placeholder="Tell me about your project!", height=130)
-                submit_button = st.form_submit_button("🚀 SEND MESSAGE", use_container_width=True)
+            # Process form if valid
+            if valid_form:
+                # Save message to database
+                save_message_to_db(name, email, message)
                 
-                if submit_button:
-                    if not rate_limit_check():
-                        st.error("⚠️ Too many submissions.")
-                    elif not name or not email or not message:
-                        st.error("❌ Please fill all fields")
-                    elif not is_valid_email(email):
-                        st.error("❌ Invalid email")
-                    elif len(message) < 10:
-                        st.error("❌ Message too short")
-                    else:
-                        name = sanitize_input(name)
-                        email = sanitize_input(email)
-                        message = sanitize_input(message)
-                        
-                        if save_message_to_db(name, email, message):
-                            st.session_state.form_submissions.append(time.time())
-                            send_email_notification(name, email, message)
-                            st.success("✅ Message sent successfully!", icon="🎉")
-                        else:
-                            st.error("❌ Failed to send.")
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Footer
-    st.markdown("""
-    <div class="animated-divider" style="margin-top:5rem;"></div>
-    <div style="text-align:center; padding:3rem 1.5rem 2rem;">
-        <p style="font-size:1.1rem; font-family:'Space Grotesk', sans-serif; font-weight:600;">
-            © 2025 Sivamahendranath Ragimanu
-        </p>
-        <p style="font-size:0.95rem; opacity:0.7; font-family:'Fira Code', monospace;">
-            Built with 💚 using Streamlit | Cyberpunk Design
-        </p>
-        <div class="fade-in" style="margin-top:2rem;">
-            <span class="glow-text" style="font-size:1.3rem;">
-                > Let's build the future with AI! 🚀
-            </span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+                # Send email notification (optional)
+                try:
+                    send_email_notification(name, email, message)
+                except Exception as e:
+                    st.warning(f"Email notification could not be sent: {e}")
+                
+                # Set success message flag
+                st.session_state.form_submitted = True
+                
+                # Rerun to show success message
+                st.rerun()
 
-if __name__ == "__main__":
-    main()
+with col2:
+    st.markdown("### 📱 Contact Information")
+   
+    # Location
+    st.markdown("#### 📍 Location")
+    st.write("Anantapur, Andhra Pradesh, India")
+   
+    # Email
+    st.markdown("#### ✉️ Email")
+    st.write("mahendraragimanu2@gmail.com")
+   
+    # Phone
+    st.markdown("#### ☎️ Phone")
+    st.write("+91 8106442744")
+   
+    # Social links using columns instead of HTML
+    st.markdown("#### 🔗 Connect With Me")
+    social_cols = st.columns(3)
+   
+    with social_cols[0]:
+        st.markdown("[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/sivamahendranath-ragimanu-68a94823b/)")
+   
+    with social_cols[1]:
+        st.markdown("[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sivamahendranath)")
+   
+    with social_cols[2]:
+        st.markdown("[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mahendraragimanu2@gmail.com)")
+
+st.markdown('</div>', unsafe_allow_html=True)
+# Footer
+st.markdown("""
+<div class="footer">
+    <p>&copy;* 2025 Sivamahendranath Ragimanu | @copy Right 2025</p>
+</div>
+""", unsafe_allow_html=True)
